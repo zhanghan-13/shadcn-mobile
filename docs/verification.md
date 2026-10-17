@@ -1,6 +1,6 @@
 # Prototype verification
 
-Verified on 2026-10-17. Android builds and all 18 executed tests passed. iOS shared Kotlin compilation passed for both configured targets; an iOS executable was not built or run.
+Verified on 2026-10-17. Android builds and all 18 executed tests passed locally and in GitHub Actions. iOS shared Kotlin compilation passed locally for both configured targets; the hosted macOS check subsequently linked both frameworks, built the Swift host and ran the app in an iPhone simulator.
 
 ## Environment
 
@@ -78,9 +78,9 @@ These tasks completed successfully and produced target KLIBs:
 ./gradlew :composeApp:compileKotlinIosArm64 :composeApp:compileKotlinIosSimulatorArm64
 ```
 
-The SwiftUI/UIKit host, framework name, Xcode build phase and shared scheme were inspected for consistency. This does **not** validate Apple framework linking, Swift compilation, signing, simulator launch, iOS keyboard handling, safe areas or VoiceOver.
+The [hosted macOS check](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) subsequently linked both Apple frameworks, built the SwiftUI/UIKit host, installed and launched the app in an iPhone simulator, checked that its process remained alive after five seconds, and captured a startup screenshot. This check does **not** validate signing, full form interactions, iOS keyboard handling, safe areas or VoiceOver.
 
-On an Apple silicon Mac, open `iosApp/iosApp.xcodeproj`, select the shared `iosApp` scheme and an iPhone simulator, then run. Verify the full form, keyboard Next/Done, searchable selection, Sheet dragging/dismissal, Dialog dismissal, dark appearance and larger Dynamic Type. No iOS runtime result is claimed from this Windows host.
+On an Apple silicon Mac, open `iosApp/iosApp.xcodeproj`, select the shared `iosApp` scheme and an iPhone simulator, then run. Verify the full form, keyboard Next/Done, searchable selection, Sheet dragging/dismissal, Dialog dismissal, dark appearance and larger Dynamic Type. The iOS runtime result above comes from the hosted Mac runner, not this Windows workstation.
 
 ## Prototype limits
 

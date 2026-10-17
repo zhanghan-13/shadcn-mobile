@@ -64,7 +64,7 @@ Requires **macOS, Xcode and a compatible JDK**. Open `iosApp/iosApp.xcodeproj`, 
 
 Targets: `iosArm64` and `iosSimulatorArm64` (Apple silicon simulator), with iOS 16+ in the Xcode host. The same `App()` composable and form logic are shared.
 
-Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. **Linking the Apple framework, compiling the SwiftUI host and running an iOS simulator require macOS/Xcode and have not been verified.**
+Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. The [hosted macOS check](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) also linked both Apple frameworks, built the Swift host and launched the app in an iPhone simulator. It checked that the app process remained alive and captured a startup screenshot. **This is a build and launch smoke check; iOS form interactions, keyboard behavior and VoiceOver still need device testing.**
 
 ## Tests and evidence
 

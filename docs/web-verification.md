@@ -1,6 +1,6 @@
 # Documentation and browser verification
 
-Verified locally on **2026-10-17**, using Chrome on Windows at `http://127.0.0.1:4173/shadcn-mobile/`. This record covers the production build before its initial publication. It does not establish the result of a GitHub Pages deployment or hosted workflow run.
+Verified on **2026-10-17**, using Chrome on Windows. The detailed build and interaction checks below were performed locally at `http://127.0.0.1:4173/shadcn-mobile/`. After publication, the complete form flow was checked separately on [GitHub Pages](https://hanzhang-13.github.io/shadcn-mobile/).
 
 ## Built artifact
 
@@ -28,6 +28,14 @@ These were manual browser interactions through the rendered UI, not a persisted 
 | Navigation | Component routes, mobile drawer navigation and the in-page API link worked. API and contents links retain the component route and a `section` parameter; clicking and refreshing the API URL both displayed the API heading. Browser scroll restoration is disabled so it cannot override the requested section. |
 | Responsive layout | Inspected the desktop layout and a 390 × 844 viewport. The narrow layout had no page-level horizontal overflow, and the drawer closed after selecting a route. |
 
+## Published site
+
+[Docs and Pages run 39045335653](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335653) passed and deployed the documentation to [GitHub Pages](https://hanzhang-13.github.io/shadcn-mobile/).
+
+On the deployed site in Chrome, the complete form flow passed: entered the form values, selected a role, saved notification preferences in the Sheet, checked the consent box, reviewed and confirmed the Dialog, and reached the success summary. This was a manual check of the rendered UI; no backend submission occurs. The success-screen capture is retained locally at `.local/published-form-success.png`.
+
+This deployed check covers the complete form flow. The individual documentation controls and component examples in the table above retain their original local verification scope.
+
 ## Screenshots
 
 - [Desktop documentation and shared form](screenshots/docs-desktop.png)
@@ -41,4 +49,4 @@ The captures are visual inspection evidence, not pixel comparison assertions. A 
 - The browser preview demonstrates the shared appearance and component flow. It does not prove native IME, system gestures, safe areas or VoiceOver behavior. See [native verification](verification.md).
 - The app Wasm, Skiko runtime, JavaScript and bundled CJK font total roughly 20 MiB before transfer compression. Webpack reports large-asset warnings; first-load cost remains a prototype limitation.
 - The dependency runtime logs a nonfatal deprecation warning about accessing Wasm memory via `wasmExports`. The tested interactions completed; this is not a clean-console claim.
-- Hosted Android/iOS/Docs jobs and the deployed Pages site must be checked separately after pushing. See [delivery status](delivery.md) and [CI validation](ci-validation.md).
+- Docs deployment and the published form flow passed. Hosted Android tests and the iOS build and launch smoke check also passed. The iOS check covers both frameworks, the Swift host, simulator installation and launch, a five-second process check, and a screenshot; it does not cover the complete form interaction flow. See [delivery status](delivery.md) and [CI validation](ci-validation.md).

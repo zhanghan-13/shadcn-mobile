@@ -1,6 +1,14 @@
-# CI configuration and local validation
+# CI configuration and validation
 
-Recorded on **2026-10-17**, before the initial publication. These are local configuration checks; no hosted workflow or Pages deployment had run at the time of these checks. Passing them does not establish that the hosted runner jobs pass. Check [GitHub Actions](https://github.com/hanzhang-13/shadcn-mobile/actions) for hosted results.
+Recorded on **2026-10-17**. Hosted workflow results are listed separately from the original local configuration checks below. Check [GitHub Actions](https://github.com/hanzhang-13/shadcn-mobile/actions) for subsequent runs.
+
+## Hosted results
+
+| Workflow | Run | Verified result |
+| --- | --- | --- |
+| Android | [39045766118](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045766118) | Passed: 10 shared host tests, 8 instrumentation tests and six screenshots. |
+| Docs and Pages | [39045335653](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335653) | Passed and deployed the [published documentation](https://hanzhang-13.github.io/shadcn-mobile/). The complete form also passed a manual Chrome check on the deployed site; see [browser verification](web-verification.md). |
+| iOS | [39045335671](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) | Passed: device/simulator frameworks linked, Swift host built, app installed and launched in the simulator, process alive after five seconds, and screenshot/evidence uploaded. This is build and launch smoke coverage. |
 
 ## Workflows
 
@@ -10,7 +18,7 @@ Recorded on **2026-10-17**, before the initial publication. These are local conf
 | [iOS](../.github/workflows/ios.yml) | One standard Apple silicon `macos-26` runner with Xcode 26.4.1 links both Apple frameworks, builds the Swift host, then installs and launches it on one available iPhone simulator. | Framework/Swift build logs, Xcode result bundle, simulator inventory, launch/process logs, screenshot, and a simulator app ZIP. |
 | [Docs and Pages](../.github/workflows/docs.yml) | Builds the shared Compose Wasm distribution and the static documentation, validates the output, and uploads a Pages artifact. A separate job deploys only on `main` push/manual runs. | A Pages artifact containing `website/dist`, including the shared demo under `demo/`. |
 
-The iOS job is a **build and launch smoke check**, not an iOS form interaction test suite. It checks that the app process remains alive after launch and captures the screen for review. Its actual execution still requires the future hosted macOS run.
+The iOS job is a **build and launch smoke check**, not an iOS form interaction test suite. The hosted run passed, including the five-second process check and screenshot capture, and uploaded its evidence. This does not establish an iOS form interaction result.
 
 Changes relevant to each platform trigger that platform's workflow. Pull requests execute build/test jobs with `contents: read`; they never deploy. The Pages deployment job alone receives `pages: write` and `id-token: write`. No workflow uses `pull_request_target`, repository write permissions, signing secrets, or a runner matrix. Checkout credentials are not persisted. Gradle uses its open-source `basic` cache provider, and pull-request caches are read-only.
 
@@ -54,13 +62,14 @@ node website/verify.mjs --dist
 
 ## Pinned dependencies
 
-External actions are pinned to release commit SHA values, resolved from their official GitHub release/tag APIs on the recorded date. The readable release number remains next to each SHA in the workflow.
+External actions are pinned to release commit SHA values, verified against their official GitHub releases, tags or APIs on the recorded date. The readable release number remains next to each SHA in the workflow.
 
 | Action | Release |
 | --- | --- |
 | [actions/checkout](https://github.com/actions/checkout/releases/tag/v7.0.1) | 7.0.1 |
 | [actions/setup-java](https://github.com/actions/setup-java/releases/tag/v6.1.0) | 6.1.0 |
 | [gradle/actions](https://github.com/gradle/actions/releases/tag/v6.4.0) | 6.4.0 |
+| [android-actions/setup-android](https://github.com/android-actions/setup-android/releases/tag/v4.0.4) | 4.0.4 |
 | [ReactiveCircus/android-emulator-runner](https://github.com/ReactiveCircus/android-emulator-runner/releases/tag/v2.38.0) | 2.38.0 |
 | [actions/upload-artifact](https://github.com/actions/upload-artifact/releases/tag/v7.0.2) | 7.0.2 |
 | [actions/setup-node](https://github.com/actions/setup-node/releases/tag/v7.1.0) | 7.1.0 |
