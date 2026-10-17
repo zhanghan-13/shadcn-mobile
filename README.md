@@ -94,7 +94,7 @@ Three workflows are prepared:
 - **iOS:** build device and simulator frameworks on macOS, compile the Swift host, launch an iPhone simulator and collect a startup screenshot. This is a smoke test, not complete iOS interaction coverage.
 - **Docs and Pages:** build the shared Wasm preview and static documentation; pull requests build only, while `main` can deploy the validated artifact to Pages.
 
-Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. Before the first deployment, configure the repository's **Settings → Pages → Source → GitHub Actions**. The expected URL is `https://hanzhang-13.github.io/shadcn-mobile/`; it is not published yet. See [delivery status](docs/delivery.md) for checks performed locally and pending remote verification.
+Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [hanzhang-13.github.io/shadcn-mobile](https://hanzhang-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/hanzhang-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.
 
 ## Scope
 
