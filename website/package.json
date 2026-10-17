@@ -1,0 +1,9 @@
+{
+  "name": "shadcn-mobile-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "node verify.mjs",
+    "verify:dist": "node verify.mjs --dist"
+  }
+}

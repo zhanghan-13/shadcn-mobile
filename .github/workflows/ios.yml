@@ -1,0 +1,52 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths: ["iosApp/**", "composeApp/**", "gradle/**", "*.gradle.kts", "gradle.properties", "gradlew", "scripts/ci-ios.sh", ".github/workflows/ios.yml"]
+  pull_request:
+    paths: ["iosApp/**", "composeApp/**", "gradle/**", "*.gradle.kts", "gradle.properties", "gradlew", "scripts/ci-ios.sh", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    name: Apple framework, Swift host and simulator launch
+    # Standard Apple silicon runner; no large/xlarge paid runner or matrix.
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Build and launch the iOS simulator host
+        run: bash scripts/ci-ios.sh
+      - name: Upload simulator build and smoke-test evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ios-simulator-results
+          path: |
+            build/ci/ios/*.log
+            build/ci/ios/*.json
+            build/ci/ios/*.png
+            build/ci/ios/*.zip
+            build/ci/ios/*.xcresult/
+          if-no-files-found: warn
+          retention-days: 7
