@@ -1,6 +1,6 @@
 # Prototype verification
 
-Verified on 2026-10-17. Android builds and all 18 executed tests passed locally and in GitHub Actions. iOS shared Kotlin compilation passed locally for both configured targets; the hosted macOS check subsequently linked both frameworks, built the Swift host and ran the app in an iPhone simulator.
+Android verification was recorded on 2026-10-17: builds and all 18 executed tests passed locally and in GitHub Actions. On 2026-10-18, the hosted iOS run linked both Apple frameworks, built the Swift host and passed all 8 native interaction tests with no failures, skips or retries.
 
 ## Environment
 
@@ -15,6 +15,9 @@ Verified on 2026-10-17. Android builds and all 18 executed tests passed locally 
 | Display | 1080 × 2400 pixels, 440 dpi |
 | Visual checks | Light, dark, 100% and 150% system font scale |
 | iOS targets | `iosArm64`, `iosSimulatorArm64`; iOS 16+ host |
+| iOS CI host | Standard Apple silicon `macos-26` runner, macOS 26.6.2 |
+| iOS toolchain | Xcode 26.4.1 (17E202), Swift 6.3.1 |
+| iOS tested device | iPhone 17 Pro simulator, iOS 26.5 (23F77), arm64 |
 
 All device commands explicitly targeted the dedicated emulator.
 
@@ -78,9 +81,22 @@ These tasks completed successfully and produced target KLIBs:
 ./gradlew :composeApp:compileKotlinIosArm64 :composeApp:compileKotlinIosSimulatorArm64
 ```
 
-The [hosted macOS check](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) subsequently linked both Apple frameworks, built the SwiftUI/UIKit host, installed and launched the app in an iPhone simulator, checked that its process remained alive after five seconds, and captured a startup screenshot. This check does **not** validate signing, full form interactions, iOS keyboard handling, safe areas or VoiceOver.
+The [hosted iOS run 39112862050](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050) tested commit `ac4ca80` on 2026-10-18. It linked both Apple frameworks, built the SwiftUI/UIKit host and ran `iosAppUITests` serially on the iPhone simulator listed above. The exported `.xcresult` summary reports **8 passed, 0 failed, 0 skipped and 0 expected failures**. The test tree contains eight distinct passing methods; the log records each method starting and passing once, without retries or runner restarts. Test execution took 486.230 seconds.
 
-On an Apple silicon Mac, open `iosApp/iosApp.xcodeproj`, select the shared `iosApp` scheme and an iPhone simulator, then run. Verify the full form, keyboard Next/Done, searchable selection, Sheet dragging/dismissal, Dialog dismissal, dark appearance and larger Dynamic Type. The iOS runtime result above comes from the hosted Mac runner, not this Windows workstation.
+The eight tests cover:
+
+1. A complete Chinese workspace flow: native Paste, role selection, saved preferences, consent, review cancellation, submission and reset.
+2. Required-field errors after an empty submission, without opening confirmation.
+3. Invalid email blocking review even when the other required fields are complete.
+4. Native keyboard Next/Done preserving the entered name and email.
+5. Sheet cancellation and swipe dismissal discarding unsaved preferences.
+6. Role search recovering from no results to a valid selection.
+7. Terms-dialog dismissal preserving the draft without accepting consent.
+8. Theme switching preserving the draft, role and consent through review.
+
+Tests use native keyboard input, Paste, taps and swipes; they do not inject form state. The CI artifact retains `.xcresult`, JSON reports, logs and step screenshots. Screenshots are inspection evidence, not pixel-golden assertions. Reviewed captures: [initial form](screenshots/ios-form.png), [selected notification preferences](screenshots/ios-preferences.png), and [Chinese success summary](screenshots/ios-success.png).
+
+To repeat the suite on an Apple silicon Mac, select the shared `iosApp` scheme in `iosApp/iosApp.xcodeproj` and use Xcode's Test action, or run `bash scripts/ci-ios.sh`. These runtime results come from the hosted Mac runner, not this Windows workstation. Physical-device installation/signing, manual VoiceOver use, larger Dynamic Type and broader device/orientation coverage remain unverified.
 
 ## Prototype limits
 

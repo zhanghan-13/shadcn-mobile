@@ -1,6 +1,6 @@
 # Documentation and browser verification
 
-Verified on **2026-10-17**, using Chrome on Windows. The detailed build and interaction checks below were performed locally at `http://127.0.0.1:4173/shadcn-mobile/`. After publication, the complete form flow was checked separately on [GitHub Pages](https://hanzhang-13.github.io/shadcn-mobile/).
+Verified on **2026-10-17**, using Chrome on Windows. The detailed build and interaction checks below were performed locally at `http://127.0.0.1:4173/shadcn-mobile/`. After publication, the complete form flow was checked separately on [GitHub Pages](https://zhanghan-13.github.io/shadcn-mobile/).
 
 ## Built artifact
 
@@ -30,7 +30,7 @@ These were manual browser interactions through the rendered UI, not a persisted 
 
 ## Published site
 
-[Docs and Pages run 39045335653](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335653) passed and deployed the documentation to [GitHub Pages](https://hanzhang-13.github.io/shadcn-mobile/).
+[Docs and Pages run 39045335653](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045335653) passed and deployed the documentation to [GitHub Pages](https://zhanghan-13.github.io/shadcn-mobile/).
 
 On the deployed site in Chrome, the complete form flow passed: entered the form values, selected a role, saved notification preferences in the Sheet, checked the consent box, reviewed and confirmed the Dialog, and reached the success summary. This was a manual check of the rendered UI; no backend submission occurs. The success-screen capture is retained locally at `.local/published-form-success.png`.
 

@@ -1,4 +1,4 @@
-export const REPOSITORY = 'https://github.com/hanzhang-13/shadcn-mobile';
+export const REPOSITORY = 'https://github.com/zhanghan-13/shadcn-mobile';
 
 export const components = {
   button: {
@@ -98,7 +98,7 @@ fun SCheckbox(
     title: 'Combobox', zh: '组合框', name: 'SCombobox', source: 'ui/Overlays.kt',
     description: '先搜索，再选择。角色选择器支持中英文搜索和无结果恢复，可用于体验移动表单中的选择流程。',
     summary: '搜索、选择与无结果恢复',
-    behavior: ['支持搜索中文名称、英文描述和角色 ID。Developer 或 开发者 都能找到同一项。', '选择后关闭菜单；再次打开保留选择并清空搜索。', '关闭时尝试将焦点还给触发器。Android 已验证系统返回关闭。'],
+    behavior: ['支持搜索中文名称、英文描述和角色 ID。Developer 或 开发者 都能找到同一项。', '搜索选择弹窗为系统键盘留出空间，列表可以滚动。选择后关闭弹窗；再次打开保留选择并清空搜索。', '关闭时尝试将焦点还给触发器。Android 已验证系统返回关闭。'],
     note: '当前 SCombobox 使用演示中的 Roles 数据：designer、developer、product、other。通用 options 参数尚未提供。',
     sample: `@Composable
 fun ComboboxExample() {

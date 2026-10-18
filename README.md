@@ -2,7 +2,7 @@
 
 A native Compose Multiplatform prototype of shadcn-inspired components for **Android and iOS**, with a documentation playground that runs the same Kotlin UI in the browser. The shared form connects Button, Input, Checkbox, a searchable Combobox, Dialog and Sheet.
 
-Repository: [hanzhang-13/shadcn-mobile](https://github.com/hanzhang-13/shadcn-mobile). The project includes Android/iOS hosts, shared components and an interactive documentation site.
+Repository: [zhanghan-13/shadcn-mobile](https://github.com/zhanghan-13/shadcn-mobile). The project includes Android/iOS hosts, shared components and an interactive documentation site.
 
 ## What the prototype does
 
@@ -64,9 +64,9 @@ Requires **macOS, Xcode and a compatible JDK**. Open `iosApp/iosApp.xcodeproj`, 
 
 Targets: `iosArm64` and `iosSimulatorArm64` (Apple silicon simulator), with iOS 16+ in the Xcode host. The same `App()` composable and form logic are shared.
 
-Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. The [hosted macOS check](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) also linked both Apple frameworks, built the Swift host and launched the app in an iPhone simulator. It checked that the app process remained alive and captured a startup screenshot. **This is a build and launch smoke check; iOS form interactions, keyboard behavior and VoiceOver still need device testing.**
+Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. On **2026-10-18**, [iOS run 39112862050](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050) linked both Apple frameworks, built the Swift host and passed all **8 native UI tests**, with no failures, skips or retries. The run used an iPhone 17 Pro simulator on iOS 26.5, hosted macOS 26.6.2, Xcode 26.4.1 and Swift 6.3.1.
 
-The `iosAppUITests` target now includes eight native form interaction tests. Run them with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. The first hosted run of this suite is pending; adding tests alone is not evidence that those interactions pass.
+The `iosAppUITests` suite covers validation, Chinese input through native Paste, role search, saved and discarded Sheet edits, keyboard Next/Done, review cancellation, submission/reset, theme changes and terms-dialog dismissal. Run it with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. **Physical-device testing, manual VoiceOver checks and larger Dynamic Type remain unverified.**
 
 ## Tests and evidence
 
@@ -93,10 +93,10 @@ The preview requires a browser with WebAssembly GC support. Native keyboard, ges
 Three workflows are prepared:
 
 - **Android:** build app/test APKs, verify shared tests actually ran, execute the API 35 emulator interaction suite, and upload APKs/reports/screenshots.
-- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute eight native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence. The recorded hosted result currently covers the earlier smoke test.
+- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute eight native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence. The recorded hosted run passed all eight tests without skips or retries.
 - **Docs and Pages:** build the shared Wasm preview and static documentation; pull requests build only, while `main` can deploy the validated artifact to Pages.
 
-Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [hanzhang-13.github.io/shadcn-mobile](https://hanzhang-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/hanzhang-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.
+Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [zhanghan-13.github.io/shadcn-mobile](https://zhanghan-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.
 
 ## Scope
 

@@ -19,7 +19,7 @@ The user authorized implementation and emulator testing without further routine 
 
 The user authorized a public GitHub repository and a GitHub Actions/Pages documentation workflow. The initial hold on commits and pushes was lifted by the user's request to polish the Chinese documentation, commit and push. Hosted workflow results and publication must be verified separately from local checks.
 
-GitHub's final API response resolves that repository to `hanzhang-13/shadcn-mobile`; the signed-in user's current login is also `hanzhang-13`. Repository links and the local remote use this canonical address.
+GitHub's final API response resolves that repository to `zhanghan-13/shadcn-mobile`; the signed-in user's current login is also `zhanghan-13`. Repository links and the local remote use this canonical address.
 
 ## Brand Commitments
 Project name: shadcn-mobile. Preserve the restrained black/white shadcn visual language, composable APIs and editable source.

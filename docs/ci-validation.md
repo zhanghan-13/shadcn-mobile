@@ -1,14 +1,14 @@
 # CI configuration and validation
 
-Recorded on **2026-10-17**. Hosted workflow results are listed separately from the original local configuration checks below. Check [GitHub Actions](https://github.com/hanzhang-13/shadcn-mobile/actions) for subsequent runs.
+Configuration checks were recorded on **2026-10-17**; the native iOS interaction result was added on **2026-10-18**. Hosted workflow results are listed separately from the original local configuration checks below. Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for subsequent runs.
 
 ## Hosted results
 
 | Workflow | Run | Verified result |
 | --- | --- | --- |
-| Android | [39045766118](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045766118) | Passed: 10 shared host tests, 8 instrumentation tests and six screenshots. |
-| Docs and Pages | [39045335653](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335653) | Passed and deployed the [published documentation](https://hanzhang-13.github.io/shadcn-mobile/). The complete form also passed a manual Chrome check on the deployed site; see [browser verification](web-verification.md). |
-| iOS | [39045335671](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) | Passed: device/simulator frameworks linked, Swift host built, app installed and launched in the simulator, process alive after five seconds, and screenshot/evidence uploaded. This is build and launch smoke coverage. |
+| Android | [39045766118](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045766118) | Passed: 10 shared host tests, 8 instrumentation tests and six screenshots. |
+| Docs and Pages | [39045335653](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045335653) | Passed and deployed the [published documentation](https://zhanghan-13.github.io/shadcn-mobile/). The complete form also passed a manual Chrome check on the deployed site; see [browser verification](web-verification.md). |
+| iOS | [39112862050](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050) | Passed at `ac4ca80`: both Apple frameworks linked, Swift host built, all 8 native UI tests passed with 0 failures, 0 skips and no retries. Reports and screenshot attachments were uploaded. |
 
 ## Workflows
 
@@ -18,9 +18,11 @@ Recorded on **2026-10-17**. Hosted workflow results are listed separately from t
 | [iOS](../.github/workflows/ios.yml) | One standard Apple silicon `macos-26` runner with Xcode 26.4.1 links both Apple frameworks and executes `iosAppUITests` serially on one available iPhone simulator. | Framework/build/test logs, `.xcresult`, exported test reports and attachments, simulator inventory, failure accessibility trees, screenshots and a simulator app ZIP. |
 | [Docs and Pages](../.github/workflows/docs.yml) | Builds the shared Compose Wasm distribution and the static documentation, validates the output, and uploads a Pages artifact. A separate job deploys only on `main` push/manual runs. | A Pages artifact containing `website/dist`, including the shared demo under `demo/`. |
 
-The recorded iOS run above used the earlier **build and launch smoke check**. The updated workflow runs eight native UI tests and checks that all eight distinct methods passed without skips or retries. Its first hosted interaction result is still pending; the earlier smoke result does not establish form interaction coverage.
+The recorded iOS run used macOS 26.6.2, Xcode 26.4.1 (17E202) and Swift 6.3.1, with one iPhone 17 Pro simulator running iOS 26.5 (23F77). Its `.xcresult` summary reports 8 passed, 0 failed, 0 skipped and 0 expected failures. The report checker verified eight distinct passing methods, and the log records one execution of each method with no runner restarts. The native suite took 486.230 seconds.
 
 The UI suite covers required fields, invalid email, a complete Chinese workspace flow with review cancellation and reset, role-search recovery, discarded Sheet edits after cancel/swipe, keyboard Next/Done, theme changes and the terms dialog. It uses system keyboard input, a native Paste action for Chinese text, taps and swipes. Tests do not inject form state. Failed runs retain a screenshot and accessibility tree; successful steps retain screenshots for visual inspection.
+
+This simulator result does not establish physical-device/signing coverage, manual VoiceOver validation or larger Dynamic Type coverage.
 
 Changes relevant to each platform trigger that platform's workflow. Pull requests execute build/test jobs with `contents: read`; they never deploy. The Pages deployment job alone receives `pages: write` and `id-token: write`. No workflow uses `pull_request_target`, repository write permissions, signing secrets, or a runner matrix. Checkout credentials are not persisted. Gradle uses its open-source `basic` cache provider, and pull-request caches are read-only.
 
