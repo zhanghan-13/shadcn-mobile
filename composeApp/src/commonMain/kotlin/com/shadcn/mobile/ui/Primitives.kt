@@ -97,6 +97,7 @@ fun SButton(
     )
     val foreground = if (variant == ButtonVariant.Primary) colors.onPrimary else colors.foreground
     val shape = RoundedCornerShape(8.dp)
+    // Guard semantic activation too, including while a loading button is inactive.
     Row(
         modifier = modifier
             .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
@@ -104,7 +105,8 @@ fun SButton(
             .clip(shape)
             .background(fill)
             .border(if (focused) 2.dp else 1.dp, if (focused) colors.mutedForeground else if (variant == ButtonVariant.Outline) colors.border else Color.Transparent, shape)
-            .clickable(enabled = active, role = Role.Button, interactionSource = interaction, indication = LocalIndication.current, onClick = onClick)
+            .clickable(enabled = active, role = Role.Button, interactionSource = interaction, indication = LocalIndication.current,
+                onClick = { if (active) onClick() })
             .semantics { if (loading) stateDescription = "正在处理" }
             .padding(horizontal = 18.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -222,7 +224,8 @@ fun SCheckbox(
             .clip(RoundedCornerShape(8.dp))
             .background(if (pressed || focused) colors.muted else Color.Transparent)
             .then(if (testTag.isNotEmpty()) Modifier.testTag(testTag) else Modifier)
-            .toggleable(value = checked, enabled = enabled, role = Role.Checkbox, interactionSource = interaction, indication = LocalIndication.current, onValueChange = onCheckedChange)
+            .toggleable(value = checked, enabled = enabled, role = Role.Checkbox, interactionSource = interaction, indication = LocalIndication.current,
+                onValueChange = { if (enabled) onCheckedChange(it) })
             .semantics(mergeDescendants = true) { if (error != null) error(error) }
             .padding(vertical = 12.dp, horizontal = 2.dp),
         verticalAlignment = Alignment.Top,

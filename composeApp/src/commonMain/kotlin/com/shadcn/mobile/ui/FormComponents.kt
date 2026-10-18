@@ -63,6 +63,7 @@ fun SSwitch(
     val track by animateColorAsState(
         if (checked) colors.primary else colors.input, tween(140), label = "switch-track",
     )
+    // Accessibility bridges can invoke disabled semantic actions, so callbacks also check enabled.
     Row(
         modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp)
             .alpha(if (enabled) 1f else 0.45f)
@@ -71,7 +72,7 @@ fun SSwitch(
             .border(1.dp, if (focused) colors.foreground else Color.Transparent, RoundedCornerShape(8.dp))
             .then(if (testTag.isNotEmpty()) Modifier.testTag(testTag) else Modifier)
             .toggleable(checked, interactionSource = interaction, indication = LocalIndication.current,
-                enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+                enabled = enabled, role = Role.Switch, onValueChange = { if (enabled) onCheckedChange(it) })
             .padding(horizontal = 4.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -199,7 +200,7 @@ fun SRadioGroup(
                     .border(1.dp, if (focused) colors.foreground else Color.Transparent, RoundedCornerShape(8.dp))
                     .then(if (testTag.isNotEmpty()) Modifier.testTag("${testTag}_${option.id}") else Modifier)
                     .selectable(selected, interactionSource = interaction, indication = LocalIndication.current,
-                        enabled = active, role = Role.RadioButton, onClick = { onSelect(option.id) })
+                        enabled = active, role = Role.RadioButton, onClick = { if (active) onSelect(option.id) })
                     .semantics { if (error != null) error(error) }
                     .padding(horizontal = 4.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.Top,

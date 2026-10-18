@@ -39,6 +39,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import com.shadcn.mobile.ui.*
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -208,6 +212,7 @@ class WorkspaceFlowTest {
         compose.onNodeWithTag("switch_count").assertTextEquals("已切换 2 次")
         compose.onNodeWithTag("switch_disabled").assertIsNotEnabled().assertIsOn()
             .performTouchInput { click() }.assertIsOn()
+        compose.onNodeWithTag("switch_disabled").performSemanticsAction(SemanticsActions.OnClick) { it() }
         compose.onNodeWithTag("switch_count").assertTextEquals("已切换 2 次")
         compose.captureEvidence("07-switch")
     }
@@ -244,6 +249,7 @@ class WorkspaceFlowTest {
         compose.onNodeWithTag("radio_selected").assertTextEquals("当前方案：专业版")
         compose.onNodeWithTag("radio_plan_disabled").assertIsNotEnabled()
             .performTouchInput { click() }.assertIsNotSelected()
+        compose.onNodeWithTag("radio_plan_disabled").performSemanticsAction(SemanticsActions.OnClick) { it() }
         compose.onNodeWithTag("radio_plan_pro").assertIsSelected()
         compose.onNodeWithTag("radio_count").assertTextEquals("已切换 1 次")
         compose.onNodeWithTag("radio_plan_free").performTouchInput { click() }.assertIsSelected()
@@ -315,6 +321,27 @@ class WorkspaceFlowTest {
 class WorkspaceStateRestorationTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Test
+    fun disabledAndLoadingPrimitivesIgnoreAccessibilityActivation() {
+        val dispatched = mutableListOf<String>()
+        compose.setContent {
+            ShadcnTheme {
+                Column {
+                    SButton("禁用按钮", { dispatched += "disabled" }, Modifier.testTag("disabled_button"), enabled = false)
+                    SButton("正在保存", { dispatched += "loading" }, Modifier.testTag("loading_button"), loading = true)
+                    SCheckbox(false, { dispatched += "checkbox" }, "禁用复选框", enabled = false, testTag = "disabled_checkbox")
+                }
+            }
+        }
+        // Accessibility bridges can invoke the action even with Disabled semantics.
+        // The component must still protect the caller's side effects.
+        listOf("disabled_button", "loading_button", "disabled_checkbox").forEach { tag ->
+            compose.onNodeWithTag(tag).assertIsNotEnabled()
+                .performSemanticsAction(SemanticsActions.OnClick) { it() }
+        }
+        compose.runOnIdle { org.junit.Assert.assertEquals(emptyList<String>(), dispatched) }
+    }
 
     @Test
     fun savedInstanceStateRestoresFormAndNotificationPreferences() {

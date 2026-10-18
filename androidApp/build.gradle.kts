@@ -26,6 +26,7 @@ android {
 }
 
 dependencies {
+    androidTestImplementation(libs.compose.foundation)
     implementation(project(":composeApp"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui)
