@@ -2,7 +2,7 @@
 
 Buildless Chinese documentation shell in `src/`. It uses hash routes, so links work at the repository's GitHub Pages subpath and on a local static server without rewriting requests. No framework or package install is required.
 
-The preview iframe loads `demo/index.html?component=form|button|input|checkbox|combobox|dialog|sheet|switch|textarea|radio-group|alert|tabs|accordion|slider|progress&theme=light|dark`. The directory contains the real Compose Wasm production build, supplied by `scripts/build-docs.mjs`; the site does not recreate the native form with HTML. All fourteen component examples live in the shared `commonMain/ComponentGallery.kt` used by Android, iOS and the browser.
+The preview iframe loads `assets/<fingerprint>/demo/index.html?component=form|button|input|checkbox|combobox|dialog|sheet|switch|textarea|radio-group|alert|tabs|accordion|slider|progress&theme=light|dark`. The directory contains the real Compose Wasm production build, supplied by `scripts/build-docs.mjs`; the site does not recreate the native form with HTML. All fourteen component examples live in the shared `commonMain/ComponentGallery.kt` used by Android, iOS and the browser.
 
 From the repository root:
 
@@ -13,6 +13,8 @@ node website/verify.mjs --dist
 ```
 
 Serve `website/dist/` over HTTP. The iframe, assets and fonts resolve relative to the deployed page. Opening the page using `file://` will not run the ES modules or Wasm preview.
+
+The builder places the documentation modules, CSS, icon and complete Wasm demo under one content fingerprint, including the builder itself in that fingerprint. A new entry page therefore cannot mix its modules with cached files from another release. `build-manifest.json` records the emitted paths and SHA-256 hashes; the distribution verifier checks those files and their references. GitHub Pages still controls caching of the root HTML, so deployment does not force an already open tab to update immediately.
 
 ## Structure
 
