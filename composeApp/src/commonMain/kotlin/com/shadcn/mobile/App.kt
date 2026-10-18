@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -29,6 +30,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.shadcn.mobile.form.*
 import com.shadcn.mobile.ui.*
 import kotlinx.coroutines.delay
@@ -40,18 +44,56 @@ private val FormSaver = listSaver<FormValues, Any>(
 )
 
 @Composable
-fun App(initialDarkTheme: Boolean? = null, onThemeChanged: (Boolean) -> Unit = {}) {
+fun App(
+    initialDarkTheme: Boolean? = null,
+    onThemeChanged: (Boolean) -> Unit = {},
+    enableComponentGallery: Boolean = false,
+) {
     val systemDark = isSystemInDarkTheme()
     var darkOverride by rememberSaveable { mutableStateOf(initialDarkTheme) }
     val dark = darkOverride ?: systemDark
+    var route by rememberSaveable { mutableStateOf("form") }
+    val states = rememberSaveableStateHolder()
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    fun navigate(destination: String) {
+        focus.clearFocus()
+        keyboard?.hide()
+        route = destination
+    }
+    fun back() = navigate(if (route == "catalog") "form" else "catalog")
+    if (enableComponentGallery) {
+        val navigationState = rememberNavigationEventState(
+            currentInfo = GalleryRoute(route),
+            backInfo = when (route) {
+                "form" -> emptyList()
+                "catalog" -> listOf(GalleryRoute("form"))
+                else -> listOf(GalleryRoute("form"), GalleryRoute("catalog"))
+            },
+        )
+        NavigationBackHandler(navigationState, isBackEnabled = route != "form", onBackCompleted = ::back)
+    }
     SideEffect { onThemeChanged(dark) }
     ShadcnTheme(darkTheme = dark) {
-        WorkspaceScreen(dark = dark, onToggleTheme = { darkOverride = !dark })
+        states.SaveableStateProvider(if (enableComponentGallery) route else "form") {
+            if (!enableComponentGallery || route == "form") {
+                WorkspaceScreen(dark = dark, onToggleTheme = { darkOverride = !dark },
+                    onOpenComponents = if (enableComponentGallery) ({ navigate("catalog") }) else null)
+            } else {
+                NativeComponentScreen(
+                    component = route.takeUnless { it == "catalog" }, dark = dark,
+                    onToggleTheme = { darkOverride = !dark }, onBack = ::back,
+                    onSelect = ::navigate,
+                )
+            }
+        }
     }
 }
 
+private data class GalleryRoute(val route: String) : NavigationEventInfo()
+
 @Composable
-private fun WorkspaceScreen(dark: Boolean, onToggleTheme: () -> Unit) {
+private fun WorkspaceScreen(dark: Boolean, onToggleTheme: () -> Unit, onOpenComponents: (() -> Unit)? = null) {
     var values by rememberSaveable(stateSaver = FormSaver) { mutableStateOf(FormValues()) }
     var attempted by rememberSaveable { mutableStateOf(false) }
     var reviewOpen by rememberSaveable { mutableStateOf(false) }
@@ -93,6 +135,9 @@ private fun WorkspaceScreen(dark: Boolean, onToggleTheme: () -> Unit) {
             Spacer(Modifier.width(10.dp))
             Text("shadcn-mobile", modifier = Modifier.weight(1f), fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold, color = colors.foreground, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (onOpenComponents != null) {
+                SButton("组件", onOpenComponents, Modifier.testTag("open_components"), variant = ButtonVariant.Ghost)
+            }
             Box(
                 Modifier.size(48.dp).testTag("theme_toggle")
                     .semantics { contentDescription = if (dark) "切换到浅色主题" else "切换到深色主题" }
@@ -207,6 +252,44 @@ private fun WorkspaceScreen(dark: Boolean, onToggleTheme: () -> Unit) {
                 color = colors.mutedForeground, fontSize = 14.sp, lineHeight = 23.sp)
             Spacer(Modifier.height(24.dp))
             SButton("我知道了", { termsOpen = false }, Modifier.fillMaxWidth().testTag("terms_close"))
+        }
+    }
+}
+
+@Composable
+private fun NativeComponentScreen(
+    component: String?, dark: Boolean, onToggleTheme: () -> Unit,
+    onBack: () -> Unit, onSelect: (String) -> Unit,
+) {
+    val colors = ShadcnTheme.colors
+    Column(Modifier.fillMaxSize().background(colors.background).safeDrawingPadding().imePadding()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            SButton(if (component == null) "返回表单" else "返回目录", onBack,
+                Modifier.testTag(if (component == null) "catalog_back" else "component_back"),
+                variant = ButtonVariant.Ghost)
+            Spacer(Modifier.weight(1f))
+            Box(Modifier.size(48.dp).testTag("theme_toggle")
+                .semantics { contentDescription = if (dark) "切换到浅色主题" else "切换到深色主题" }
+                .clickable(role = Role.Button, onClick = onToggleTheme), contentAlignment = Alignment.Center) {
+                SIcon(if (dark) "sun" else "moon")
+            }
+        }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.border))
+        if (component == null) {
+            Column(Modifier.fillMaxSize().testTag("catalog_scroll").verticalScroll(rememberScrollState())
+                .padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("组件示例", Modifier.semantics { heading() }, color = colors.foreground,
+                    fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                Text("在设备上体验输入、选择和反馈。返回表单后可以继续填写。",
+                    color = colors.mutedForeground, fontSize = 14.sp, lineHeight = 22.sp)
+                componentNames.forEach { name ->
+                    SButton(componentTitle(name), { onSelect(name) },
+                        Modifier.fillMaxWidth().testTag("catalog_$name"), variant = ButtonVariant.Outline)
+                }
+            }
+        } else {
+            ComponentGallery(component, dark, centerContent = false)
         }
     }
 }

@@ -42,6 +42,7 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
             implementation(libs.compose.material3)
+            implementation("org.jetbrains.androidx.navigationevent:navigationevent-compose:1.1.0")
             implementation("org.jetbrains.compose.components:components-resources:${libs.versions.compose.get()}")
         }
         commonTest.dependencies { implementation(kotlin("test")) }

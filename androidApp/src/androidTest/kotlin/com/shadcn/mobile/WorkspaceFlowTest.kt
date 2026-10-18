@@ -12,6 +12,11 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -30,6 +35,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.pressBack
@@ -186,6 +194,119 @@ class WorkspaceFlowTest {
         compose.onNodeWithTag("review_dialog").assertDoesNotExist()
         compose.onNodeWithTag("workspace_name").performScrollTo().assertTextEquals("设计工作室")
         compose.onNodeWithTag("email").performScrollTo().assertTextEquals("hello@example.com")
+    }
+
+    @Test
+    fun switchLabelAndTrackToggleOnceWhileDisabledSwitchStaysOn() {
+        openComponent("switch")
+        val toggle = compose.onNodeWithTag("switch_updates").assertIsOff()
+            .assertHeightIsAtLeast(48.dp)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Switch))
+        toggle.performTouchInput { click(Offset(width * 0.2f, height / 2f)) }.assertIsOn()
+        compose.onNodeWithTag("switch_count").assertTextEquals("已切换 1 次")
+        toggle.performTouchInput { click(Offset(width * 0.94f, height / 2f)) }.assertIsOff()
+        compose.onNodeWithTag("switch_count").assertTextEquals("已切换 2 次")
+        compose.onNodeWithTag("switch_disabled").assertIsNotEnabled().assertIsOn()
+            .performTouchInput { click() }.assertIsOn()
+        compose.onNodeWithTag("switch_count").assertTextEquals("已切换 2 次")
+        compose.captureEvidence("07-switch")
+    }
+
+    @Test
+    fun textareaPreservesChineseNewlinesAndReadOnlyContent() {
+        openComponent("textarea")
+        compose.onNodeWithTag("textarea_validate").performScrollTo().performClick()
+        compose.onNodeWithTag("textarea_notes_error").assertExists()
+        val input = "设计说明\n  保留两处空格\n下一步计划"
+        compose.onNodeWithTag("textarea_notes").performScrollTo().performTextInput(input)
+        compose.onNodeWithTag("textarea_notes").assertTextEquals(input)
+        compose.onNodeWithTag("textarea_notes_error").assertDoesNotExist()
+        closeSoftKeyboard()
+        compose.onNodeWithTag("textarea_readonly").performScrollTo().assertIsEnabled()
+            .performTouchInput { click() }
+            .assertTextEquals("这段说明可以选择和复制。\n只读内容不会被编辑。")
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.SetText))
+        compose.onNodeWithTag("textarea_disabled").performScrollTo().assertIsNotEnabled()
+            .performTouchInput { click() }.assertTextEquals("当前不可编辑")
+        compose.onNodeWithTag("textarea_notes").performScrollTo().assertTextEquals(input)
+        compose.captureEvidence("08-textarea")
+    }
+
+    @Test
+    fun radioGroupMaintainsOneSelectionAndIgnoresDisabledOption() {
+        openComponent("radio-group")
+        compose.onNodeWithTag("radio_plan_free").assertIsSelected()
+            .assertHeightIsAtLeast(48.dp)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
+        compose.onNodeWithTag("radio_plan_pro").assertIsNotSelected().performTouchInput { click() }
+            .assertIsSelected()
+        compose.onNodeWithTag("radio_plan_free").assertIsNotSelected()
+        compose.onNodeWithTag("radio_selected").assertTextEquals("当前方案：专业版")
+        compose.onNodeWithTag("radio_plan_disabled").assertIsNotEnabled()
+            .performTouchInput { click() }.assertIsNotSelected()
+        compose.onNodeWithTag("radio_plan_pro").assertIsSelected()
+        compose.onNodeWithTag("radio_count").assertTextEquals("已切换 1 次")
+        compose.onNodeWithTag("radio_plan_free").performTouchInput { click() }.assertIsSelected()
+        compose.onNodeWithTag("radio_plan_pro").assertIsNotSelected()
+        compose.onNodeWithTag("radio_count").assertTextEquals("已切换 2 次")
+        compose.captureEvidence("09-radio")
+    }
+
+    @Test
+    fun alertAnnouncesDynamicFeedbackWithoutActingLikeAButton() {
+        openComponent("alert")
+        compose.onNodeWithTag("alert_default").assertTextContains("本地演示")
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.LiveRegion))
+        compose.onNodeWithTag("alert_destructive").assertTextContains("无法保存更改")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        compose.captureEvidence("10-alert")
+        compose.onNodeWithTag("alert_trigger").performTouchInput { click() }.assertIsNotEnabled()
+        compose.onNodeWithTag("alert_destructive").assertTextContains("已重新连接")
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+    }
+
+    @Test
+    fun galleryBackNavigationPreservesFormThemeAndComponentState() {
+        compose.enterWorkspaceDetails()
+        compose.selectDeveloper()
+        compose.onNodeWithTag("terms_checkbox").performScrollTo().performClick()
+        compose.onNodeWithTag("theme_toggle").performClick()
+        openComponent("switch")
+        compose.onNodeWithTag("switch_updates").performClick().assertIsOn()
+        pressBack()
+        compose.onNodeWithTag("catalog_switch").performScrollTo().performClick()
+        compose.onNodeWithTag("switch_updates").assertIsOn()
+        compose.onNodeWithTag("switch_count").assertTextEquals("已切换 1 次")
+        compose.onNodeWithTag("component_back").performClick()
+        pressBack()
+        compose.onNodeWithTag("workspace_name").performScrollTo().assertTextEquals("设计工作室")
+        compose.onNodeWithTag("email").performScrollTo().assertTextEquals("hello@example.com")
+        compose.onNodeWithTag("terms_checkbox").performScrollTo().assertIsOn()
+        compose.onNodeWithTag("theme_toggle").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.ContentDescription, listOf("切换到浅色主题")))
+        compose.onNodeWithTag("submit_button").performScrollTo().performClick()
+        compose.onNodeWithTag("review_dialog").assertIsDisplayed()
+    }
+
+    @Test
+    fun activityRecreationRestoresGalleryRouteTextAndHiddenFormDraft() {
+        compose.enterWorkspaceDetails()
+        openComponent("textarea")
+        compose.onNodeWithTag("textarea_notes").performScrollTo().performTextInput("保留草稿\n第二行")
+        closeSoftKeyboard()
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithTag("textarea_notes").performScrollTo().assertTextEquals("保留草稿\n第二行")
+        pressBack()
+        pressBack()
+        compose.onNodeWithTag("workspace_name").performScrollTo().assertTextEquals("设计工作室")
+        compose.onNodeWithTag("email").performScrollTo().assertTextEquals("hello@example.com")
+    }
+
+    private fun openComponent(name: String) {
+        compose.onNodeWithTag("open_components").performClick()
+        compose.onNodeWithTag("catalog_$name").performScrollTo().performClick()
+        compose.onNodeWithTag("component_scroll").assertIsDisplayed()
     }
 }
 

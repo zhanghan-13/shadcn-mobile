@@ -26,9 +26,9 @@ let searchIndex = 0;
 
 function highlight(code, language) {
   if (language !== 'kotlin') return escapeHtml(code);
-  return code.split(/(\/\/[^\n]*|"(?:[^"\\]|\\.)*"|@[A-Za-z]+|\b(?:fun|var|val|if|else|true|false|null|by|import|return|class|data|object|private)\b|\b(?:SButton|SInput|SCheckbox|SCombobox|SDialog|PreferencesSheet|ShadcnTheme|Modifier|ButtonVariant|Color|Boolean|String|Unit|KeyboardOptions|KeyboardType|ImeAction|ColumnScope|FocusRequester)\b)/g)
+  return code.split(/(\/\/[^\n]*|"(?:[^"\\]|\\.)*"|@[A-Za-z]+|\b(?:fun|var|val|if|else|true|false|null|by|import|return|class|data|enum|object|private)\b|\b(?:SButton|SInput|SCheckbox|SCombobox|SDialog|PreferencesSheet|SSwitch|STextarea|SRadioGroup|SAlert|RadioOption|AlertVariant|ShadcnTheme|Modifier|ButtonVariant|Color|Boolean|String|Int|List|Unit|KeyboardOptions|KeyboardActions|KeyboardType|ImeAction|ColumnScope|FocusRequester)\b)/g)
     .map((token) => {
-      const type = token.startsWith('//') ? 'comment' : token.startsWith('"') ? 'string' : /^@|^(fun|var|val|if|else|true|false|null|by|import|return|class|data|object|private)$/.test(token) ? 'keyword' : /^[A-Z][\w]*$/.test(token) ? 'type' : '';
+      const type = token.startsWith('//') ? 'comment' : token.startsWith('"') ? 'string' : /^@|^(fun|var|val|if|else|true|false|null|by|import|return|class|data|enum|object|private)$/.test(token) ? 'keyword' : /^[A-Z][\w]*$/.test(token) ? 'type' : '';
       return type ? `<span class="code-${type}">${escapeHtml(token)}</span>` : escapeHtml(token);
     }).join('');
 }
@@ -50,10 +50,11 @@ function demoUrl(component = 'form') {
 function playground(component, code) {
   const title = component === 'form' ? '完整表单' : components[component].title;
   const url = demoUrl(component);
+  const source = `${REPOSITORY}/blob/main/composeApp/src/commonMain/kotlin/com/shadcn/mobile/${component === 'form' ? 'App.kt' : 'ComponentGallery.kt'}`;
   return `<div class="playground" id="preview"><div class="playground-toolbar">
     <div class="tabs" role="tablist" aria-label="${title}示例视图"><button class="tab" id="tab-preview" role="tab" aria-selected="true" aria-controls="panel-preview" data-tab="preview">交互预览</button><button class="tab" id="tab-code" role="tab" aria-selected="false" aria-controls="panel-code" tabindex="-1" data-tab="code">使用代码</button></div>
     <div class="preview-tools"><button class="icon-button" data-width-button="phone" aria-pressed="true" aria-label="手机宽度" title="手机宽度">${icon('phone')}</button><button class="icon-button" data-width-button="wide" aria-pressed="false" aria-label="填满预览区域" title="填满预览区域">${icon('wide')}</button><span class="tool-separator" aria-hidden="true"></span><button class="icon-button" data-reload aria-label="重置预览" title="重置预览">${icon('reload')}</button><a class="icon-button preview-open" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="在新页面打开预览" title="在新页面打开预览">${icon('external')}</a></div>
-    </div><div id="panel-preview" role="tabpanel" aria-labelledby="tab-preview"><div class="preview-stage${component !== 'form' ? ' component-stage' : ''}"><div class="preview-device" data-width="phone"><iframe src="${escapeHtml(url)}" title="${title}：真实 Compose 交互预览" data-component="${component}" allow="clipboard-write"></iframe></div></div><div class="preview-caption"><span>与移动端共享 Kotlin 组件</span><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="preview-open-text">在独立页面体验${icon('external')}</a></div></div><div id="panel-code" class="code-tab" role="tabpanel" aria-labelledby="tab-code" hidden>${codeBlock(code)}</div></div>`;
+    </div><div id="panel-preview" role="tabpanel" aria-labelledby="tab-preview"><div class="preview-stage${component !== 'form' ? ' component-stage' : ''}"><div class="preview-device" data-width="phone"><iframe src="${escapeHtml(url)}" title="${title}：真实 Compose 交互预览" data-component="${component}" allow="clipboard-write"></iframe></div></div><div class="preview-caption"><span>与移动端共享 Kotlin 组件</span>${externalLink(source, '示例源码')}<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="preview-open-text">在独立页面体验${icon('external')}</a></div></div><div id="panel-code" class="code-tab" role="tabpanel" aria-labelledby="tab-code" hidden>${codeBlock(code)}</div></div>`;
 }
 function overview() {
   const example = `import androidx.compose.runtime.Composable
@@ -64,12 +65,12 @@ fun WorkspaceDemo() {
     // 完整表单自带主题切换与可恢复的表单状态
     App()
 }`;
-  return `<div class="page-intro"><h1>熟悉的设计，原生的交互。</h1><p class="lead">面向 Android 与 iOS，延续 shadcn 的简洁风格。<br>在完整表单中体验六个共享的 Compose 组件。</p><div class="intro-links">${buttonLink('installation', '开始使用', true)}${externalLink(REPOSITORY, 'GitHub 仓库', 'text-button')}<span class="subtle-label">${icon('layers')}Compose Multiplatform</span></div></div>
+  return `<div class="page-intro"><h1>熟悉的设计，原生的交互。</h1><p class="lead">面向 Android 与 iOS，延续 shadcn 的简洁风格。<br>通过完整表单与独立示例，体验十个共享的 Compose 组件。</p><div class="intro-links">${buttonLink('installation', '开始使用', true)}${externalLink(REPOSITORY, 'GitHub 仓库', 'text-button')}<span class="subtle-label">${icon('layers')}Compose Multiplatform</span></div></div>
     ${playground('form', example)}
     <p class="preview-note">填写信息、搜索角色、调整通知偏好，再确认创建，数据只保留在当前演示中。网页预览可以体验组件外观和表单流程；系统键盘、返回手势和辅助功能仍需在原生 App 中验证。</p>
-    ${section('components', '六个组件，一个完整流程。', `<p>点击组件，查看独立预览、使用示例与当前 Kotlin API。</p><div class="component-list">${Object.entries(components).map(([key, entry]) => `<a class="component-row" href="#/components/${key}"><strong>${entry.title}</strong><span>${entry.summary}</span>${icon('chevron')}</a>`).join('')}</div>`)}
+    ${section('components', '十个组件，按需组合。', `<p>点击组件，查看独立预览、使用示例与当前 Kotlin API。</p><div class="component-list">${Object.entries(components).map(([key, entry]) => `<a class="component-row" href="#/components/${key}"><strong>${entry.title}</strong><span>${entry.summary}</span>${icon('chevron')}</a>`).join('')}</div>`)}
     ${section('approach', '保留设计语言，遵循平台习惯。', `<p>颜色、边框和留白延续 shadcn 的风格，状态、内容插槽和事件回调采用 Compose 的写法。你可以直接修改源码。</p>${checkList(['Zinc 语义配色，浅色与深色主题。', '至少 48dp 的交互区域，支持字体缩放。', '明确的焦点、选择、加载与错误状态。'])}`)}
-    ${section('status', '现在可以用它验证什么？', '<p>Android 原型已在模拟器验证表单流程、键盘、弹层关闭、主题切换和状态恢复。iOS 已在 iPhone 17 Pro（iOS 26.5）模拟器通过 8 项原生交互测试，覆盖中文表单、键盘、角色搜索、偏好设置、弹窗、主题切换和重置，0 失败、0 跳过且未重试。<a href="https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050" target="_blank" rel="noopener noreferrer">查看 CI 记录</a>。</p><p>iOS 真机、VoiceOver 人工检查和大字号仍未验证。项目目前是可运行的早期原型，尚未发布 Maven 组件包。Combobox 和 Sheet 仍使用演示场景的数据与内容。</p><p>详细验证记录见项目中的 <code>docs/verification.md</code>，模拟器截图位于 <code>docs/screenshots/</code>。</p>')}`;
+    ${section('status', '现在可以用它验证什么？', '<p>Android 原型已在模拟器验证表单流程、键盘、弹层关闭、主题切换和状态恢复。iOS 已在 iPhone 17 Pro（iOS 26.5）模拟器通过 8 项原生交互测试，覆盖中文表单、键盘、角色搜索、偏好设置、弹窗、主题切换和重置，0 失败、0 跳过且未重试。<a href="https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050" target="_blank" rel="noopener noreferrer">查看 CI 记录</a>。</p><p>这 8 项测试覆盖原有表单，不包含新增的 Switch、Textarea、RadioGroup 和 Alert。iOS 真机、VoiceOver 人工检查和大字号仍未验证。项目尚未发布 Maven 组件包，Combobox 和 Sheet 仍使用演示场景的数据与内容。</p><p>详细验证记录见项目中的 <code>docs/verification.md</code>，模拟器截图位于 <code>docs/screenshots/</code>。</p>')}`;
 }
 function installation() {
   const useExample = `import androidx.compose.runtime.*
@@ -105,11 +106,13 @@ function theming() {
 }
 function componentPage(key) {
   const component = components[key];
-  return `<div class="page-intro"><h1>${component.title}</h1><p class="lead">${component.description}</p><div class="intro-links"><a class="text-button" href="#/components/${key}?section=api" data-section="api">查看 Kotlin API${icon('code')}</a><span class="subtle-label">${icon('code')}${component.name}</span></div></div>
+  const relatedTypes = (component.types || []).map((type) => `<h3>${escapeHtml(type.name)}</h3><p>${escapeHtml(type.description)}</p>${codeBlock(type.signature)}`).join('');
+  const source = `${REPOSITORY}/blob/main/composeApp/src/commonMain/kotlin/com/shadcn/mobile/${component.source}`;
+  return `<div class="page-intro"><h1>${component.title}</h1><p class="lead">${component.description}</p><div class="intro-links"><a class="text-button" href="#/components/${key}?section=api" data-section="api">查看 Kotlin API${icon('code')}</a>${externalLink(source, '组件源码', 'text-button')}<span class="subtle-label">${icon('code')}${component.name}</span></div></div>
     ${playground(key, component.sample)}<p class="preview-note">预览运行共享的 Compose 实现。系统键盘、返回手势和辅助功能行为，以原生设备验证为准。</p>
     ${section('usage', '使用方式', `${component.note ? `<div class="note">${component.note}</div>` : ''}<p>在 <code>ShadcnTheme</code> 下调用，状态和事件由你的业务代码管理。</p>${codeBlock(component.sample)}`)}
     ${section('behavior', '交互约定', `<ul>${component.behavior.map((item) => `<li>${item}</li>`).join('')}</ul>`)}
-    ${section('api', 'API 参考', `<p>以下参数与仓库中的当前实现一致。</p><div class="table-scroll"><table class="api-table"><thead><tr><th>参数</th><th>类型 / 默认值</th><th>说明</th></tr></thead><tbody>${component.props.map(([name, type, description]) => `<tr><td><code>${escapeHtml(name)}</code></td><td><code>${escapeHtml(type)}</code></td><td>${description}</td></tr>`).join('')}</tbody></table></div><details class="signature"><summary>完整函数签名</summary>${codeBlock(component.signature)}</details>`)}
+    ${section('api', 'API 参考', `<p>以下参数与仓库中的当前实现一致。</p><div class="table-scroll"><table class="api-table"><thead><tr><th>参数</th><th>类型 / 默认值</th><th>说明</th></tr></thead><tbody>${component.props.map(([name, type, description]) => `<tr><td><code>${escapeHtml(name)}</code></td><td><code>${escapeHtml(type)}</code></td><td>${description}</td></tr>`).join('')}</tbody></table></div><details class="signature"><summary>完整函数签名</summary>${codeBlock(component.signature)}</details>${relatedTypes}`)}
     ${section('native', '在移动端验证', '<p>浏览器可用于快速体验组件状态。接入 App 前，请检查实际设备上的触控、键盘遮挡、字体缩放与辅助功能。<a href="#/installation">查看原生运行方式</a>。</p>')}`;
 }
 function renderNavigation() {

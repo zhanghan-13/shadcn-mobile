@@ -13,6 +13,7 @@ mkdir -p "$output/screenshots"
 adb wait-for-device
 adb shell cmd uimode night no
 adb shell settings put system font_scale 1.0
+adb shell settings put secure show_ime_with_hard_keyboard 1
 adb shell wm size 1080x2400
 adb shell wm density 420
 adb install -r androidApp/build/outputs/apk/debug/androidApp-debug.apk
@@ -32,7 +33,7 @@ fi
 if [[ "$runner_status" -ne 0 ]]; then
   exit "$runner_status"
 fi
-python3 scripts/ci-check-tests.py instrumentation "$output/instrumentation.txt" 8
-for capture in 01-form 02-combobox 03-sheet 04-review 05-success 06-dark; do
+python3 scripts/ci-check-tests.py instrumentation "$output/instrumentation.txt" 14
+for capture in 01-form 02-combobox 03-sheet 04-review 05-success 06-dark 07-switch 08-textarea 09-radio 10-alert; do
   test -s "$output/screenshots/$capture.png"
 done

@@ -213,6 +213,152 @@ final class WorkspaceFlowTests: XCTestCase {
         expectSelected("terms_checkbox", false)
     }
 
+    @MainActor
+    func testSwitchTogglesOnceAndIgnoresDisabledTap() {
+        openComponent("switch")
+        expectEnabled("switch_updates", true)
+        expectSelected("switch_updates", false)
+        expectEnabled("switch_disabled", false)
+        expectSelected("switch_disabled", true)
+        expectLabel("switch_count", "已切换 0 次")
+
+        tap("switch_updates")
+        expectSelected("switch_updates", true)
+        expectLabel("switch_count", "已切换 1 次")
+        // Exercise both the labeled row and the trailing visual switch with native touches.
+        element("switch_updates").coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        expectSelected("switch_updates", false)
+        expectLabel("switch_count", "已切换 2 次")
+
+        tapDisabledControl("switch_disabled")
+        expectSelected("switch_disabled", true)
+        expectSelected("switch_updates", false)
+        expectLabel("switch_count", "已切换 2 次")
+        capture("switch-disabled-and-callback-count")
+    }
+
+    @MainActor
+    func testTextareaAcceptsChineseMultilineAndProtectsNoneditableValues() {
+        openComponent("textarea")
+        expectValue("textarea_notes", "")
+        tap("textarea_validate", scrolling: .up)
+        reveal("textarea_notes_error", direction: .down)
+        expectLabel("textarea_notes_error", "请填写项目说明。")
+        reveal("textarea_notes", direction: .down)
+
+        let pastedLines = "第一行中文\n第二行中文"
+        paste(pastedLines, into: "textarea_notes")
+        expectAbsent("textarea_notes_error")
+        // A real return key appends a third line; Paste alone cannot prove multiline editing.
+        let keyboardLine = "\nKeyboard third line"
+        element("textarea_notes").typeText(keyboardLine)
+        let completeNotes = pastedLines + keyboardLine
+        expectValue("textarea_notes", completeNotes)
+        capture("textarea-chinese-and-keyboard-newlines")
+
+        tap("textarea_readonly", scrolling: .up)
+        expectKeyboardHidden()
+        expectEnabled("textarea_readonly", true)
+        expectValue("textarea_readonly", "这段说明可以选择和复制。\n只读内容不会被编辑。")
+        expectValue("textarea_notes", completeNotes)
+
+        tapDisabledControl("textarea_disabled")
+        expectKeyboardHidden()
+        expectValue("textarea_disabled", "当前不可编辑")
+        expectValue("textarea_readonly", "这段说明可以选择和复制。\n只读内容不会被编辑。")
+        expectValue("textarea_notes", completeNotes)
+        capture("textarea-readonly-and-disabled")
+    }
+
+    @MainActor
+    func testRadioGroupKeepsOneSelectionAndIgnoresDisabledTap() {
+        openComponent("radio-group")
+        expectSelected("radio_plan_free", true)
+        expectSelected("radio_plan_pro", false)
+        expectSelected("radio_plan_disabled", false)
+        expectEnabled("radio_plan_disabled", false)
+        expectLabel("radio_selected", "当前方案：免费版")
+        expectLabel("radio_count", "已切换 0 次")
+
+        tap("radio_plan_pro", scrolling: .up)
+        expectSelected("radio_plan_free", false)
+        expectSelected("radio_plan_pro", true)
+        expectSelected("radio_plan_disabled", false)
+        expectLabel("radio_selected", "当前方案：专业版")
+        expectLabel("radio_count", "已切换 1 次")
+        tapDisabledControl("radio_plan_disabled")
+        expectSelected("radio_plan_free", false)
+        expectSelected("radio_plan_pro", true)
+        expectSelected("radio_plan_disabled", false)
+        expectLabel("radio_selected", "当前方案：专业版")
+        expectLabel("radio_count", "已切换 1 次")
+
+        tap("radio_plan_free", scrolling: .down)
+        expectSelected("radio_plan_free", true)
+        expectSelected("radio_plan_pro", false)
+        expectSelected("radio_plan_disabled", false)
+        expectLabel("radio_selected", "当前方案：免费版")
+        expectLabel("radio_count", "已切换 2 次")
+        capture("radio-exclusive-selection")
+    }
+
+    @MainActor
+    func testAlertUpdatesContentAfterRetry() {
+        openComponent("alert")
+        expectAlert("alert_default", title: "本地演示",
+                    description: "这里的更改只保存在当前设备，不会提交到服务器。")
+        expectAlert("alert_destructive", title: "无法保存更改",
+                    description: "连接已断开。检查网络后再试一次。")
+        expectLabel("alert_trigger", "重试保存")
+        expectEnabled("alert_trigger", true)
+        capture("alert-before-retry")
+
+        tap("alert_trigger", scrolling: .up)
+        expectAlert("alert_destructive", title: "已重新连接", description: "现在可以继续编辑。")
+        expectAlert("alert_default", title: "本地演示",
+                    description: "这里的更改只保存在当前设备，不会提交到服务器。")
+        expectLabel("alert_trigger", "连接已恢复")
+        expectEnabled("alert_trigger", false)
+        capture("alert-reconnected")
+    }
+
+    @MainActor
+    func testComponentNavigationPreservesFormDraftAndTheme() {
+        enterDetails(name: "Navigation workspace", email: "hello@example.com")
+        selectDeveloper()
+        tap("preferences_button", scrolling: .up)
+        tap("product_news")
+        expectSelected("product_news", true)
+        tap("save_preferences")
+        tap("terms_checkbox", scrolling: .up)
+        expectSelected("terms_checkbox", true)
+        let previousThemeLabel = element("theme_toggle").label
+        tap("theme_toggle")
+        expect(element("theme_toggle"), "label != %@", previousThemeLabel)
+        let selectedThemeLabel = element("theme_toggle").label
+
+        openComponent("switch")
+        expectSelected("switch_updates", false)
+        expectLabel("theme_toggle", selectedThemeLabel)
+        tap("theme_toggle")
+        expect(element("theme_toggle"), "label != %@", selectedThemeLabel)
+        let detailThemeLabel = element("theme_toggle").label
+        capture("native-component-detail")
+        tap("component_back")
+        XCTAssertTrue(element("catalog_back").waitForExistence(timeout: 5))
+        expectLabel("theme_toggle", detailThemeLabel)
+        tap("catalog_back")
+        reveal("workspace_name", direction: .down)
+        expectValue("workspace_name", "Navigation workspace")
+        expectValue("email", "hello@example.com")
+        expectLabel("theme_toggle", detailThemeLabel)
+        reveal("terms_checkbox", direction: .up)
+        expectSelected("terms_checkbox", true)
+        tap("submit_button", scrolling: .up)
+        expectSummary(name: "Navigation workspace", preferences: "工作空间更新与产品动态")
+        capture("native-navigation-preserved-draft")
+    }
+
     private enum ScrollDirection { case up, down }
 
     @MainActor private var app: XCUIApplication {
@@ -230,7 +376,13 @@ final class WorkspaceFlowTests: XCTestCase {
         for _ in 0..<7 {
             let target = element(tag)
             if target.exists && target.isHittable { return }
-            if direction == .up { app.swipeUp() } else { app.swipeDown() }
+            if element("component_back").exists {
+                scrollComponent(direction)
+            } else if direction == .up {
+                app.swipeUp()
+            } else {
+                app.swipeDown()
+            }
         }
         XCTAssertTrue(element(tag).exists && element(tag).isHittable, "Could not reveal \(tag)")
     }
@@ -241,6 +393,53 @@ final class WorkspaceFlowTests: XCTestCase {
         XCTAssertTrue(target.waitForExistence(timeout: 10), "Missing \(tag)")
         expect(target, "hittable == true")
         target.tap()
+    }
+
+    @MainActor private func openComponent(_ slug: String) {
+        tap("open_components")
+        tap("catalog_\(slug)", scrolling: .up)
+        XCTAssertTrue(element("component_back").waitForExistence(timeout: 5))
+    }
+
+    @MainActor private func scrollComponent(_ direction: ScrollDirection) {
+        let content = element("component_scroll")
+        XCTAssertTrue(content.waitForExistence(timeout: 5))
+        let screen = app.frame
+        let frame = content.frame.intersection(screen)
+        let top = max(frame.minY, element("component_back").frame.maxY)
+        let keyboard = app.keyboards.element
+        let bottom = keyboard.exists ? min(frame.maxY, keyboard.frame.minY) : frame.maxY
+        let height = bottom - top
+        XCTAssertGreaterThan(height, 80, "The component must expose a scrollable area above the keyboard")
+        // Stay in the gallery's trailing padding, outside the Textarea's own scroll
+        // surface and above the keyboard. The gesture uses the current AX geometry.
+        let x = frame.maxX - 10 - screen.minX
+        let upperY = top + height * 0.2 - screen.minY
+        let lowerY = top + height * 0.8 - screen.minY
+        let origin = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+        let upper = origin.withOffset(CGVector(dx: x, dy: upperY))
+        let lower = origin.withOffset(CGVector(dx: x, dy: lowerY))
+        if direction == .up {
+            lower.press(forDuration: 0.1, thenDragTo: upper)
+        } else {
+            upper.press(forDuration: 0.1, thenDragTo: lower)
+        }
+    }
+
+    @MainActor private func tapDisabledControl(_ tag: String) {
+        // Disabled elements need not be hittable. Send a real touch at their visible
+        // accessibility frame, then let each test assert that state/callbacks did not change.
+        for _ in 0..<7 {
+            let target = element(tag)
+            if target.exists && !target.frame.isEmpty && app.frame.contains(target.frame)
+                && target.frame.minY > element("component_back").frame.maxY {
+                expectEnabled(tag, false)
+                target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+                return
+            }
+            scrollComponent(.up)
+        }
+        XCTFail("Could not reveal disabled control \(tag) for a native touch")
     }
 
     @MainActor private func type(_ tag: String, _ text: String) {
@@ -271,13 +470,18 @@ final class WorkspaceFlowTests: XCTestCase {
     }
 
     @MainActor private func pasteChineseWorkspaceName() {
+        paste("设计工作室", into: "workspace_name")
+        pressKeyboardButton(["Next", "next", "下一项", "下一个"])
+    }
+
+    @MainActor private func paste(_ text: String, into tag: String) {
         // A native Paste action exercises Unicode input without depending on a Pinyin
         // keyboard being installed on the CI simulator. It does not prefill app state.
-        UIPasteboard.general.string = "设计工作室"
-        tap("workspace_name")
+        UIPasteboard.general.string = text
+        tap(tag)
         XCTAssertTrue(app.keyboards.element.waitForExistence(timeout: 5))
         dismissKeyboardIntroductionIfPresent()
-        element("workspace_name").press(forDuration: 1.0)
+        element(tag).press(forDuration: 1.0)
         let pastePredicate = NSPredicate(format: "label IN %@", ["Paste", "粘贴"])
         let menuItem = app.menuItems.matching(pastePredicate).element
         let button = app.buttons.matching(pastePredicate).element
@@ -295,8 +499,7 @@ final class WorkspaceFlowTests: XCTestCase {
             allowPaste.tap()
         }
         dismissKeyboardIntroductionIfPresent()
-        expectValue("workspace_name", "设计工作室")
-        pressKeyboardButton(["Next", "next", "下一项", "下一个"])
+        expectValue(tag, text)
     }
 
     @MainActor private func pressKeyboardButton(_ labels: [String]) {
@@ -343,9 +546,19 @@ final class WorkspaceFlowTests: XCTestCase {
 
     @MainActor private func expectSelected(_ tag: String, _ selected: Bool) {
         XCTAssertTrue(element(tag).waitForExistence(timeout: 5), "Missing \(tag)")
-        // Compose iOS exports ToggleableState as UIAccessibilityTraitSelected.
-        // The actual checkbox accessibility elements are buttons with no value.
+        // Compose iOS exports ToggleableState/Selected as UIAccessibilityTraitSelected.
+        // Query the identifier rather than assuming a native checkbox/switch/radio type.
         expect(element(tag), selected ? "selected == true" : "selected == false")
+    }
+
+    @MainActor private func expectEnabled(_ tag: String, _ enabled: Bool) {
+        XCTAssertTrue(element(tag).waitForExistence(timeout: 5), "Missing \(tag)")
+        expect(element(tag), enabled ? "enabled == true" : "enabled == false")
+    }
+
+    @MainActor private func expectAlert(_ tag: String, title: String, description: String) {
+        XCTAssertTrue(element(tag).waitForExistence(timeout: 5), "Missing \(tag)")
+        expect(element(tag), "label CONTAINS %@ AND label CONTAINS %@", title, description)
     }
 
     @MainActor private func expectLabel(_ tag: String, _ value: String) {

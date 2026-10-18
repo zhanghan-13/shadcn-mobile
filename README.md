@@ -1,6 +1,6 @@
 # shadcn-mobile
 
-A native Compose Multiplatform prototype of shadcn-inspired components for **Android and iOS**, with a documentation playground that runs the same Kotlin UI in the browser. The shared form connects Button, Input, Checkbox, a searchable Combobox, Dialog and Sheet.
+A native Compose Multiplatform prototype of ten shadcn-inspired components for **Android and iOS**, with a documentation playground that runs the same Kotlin UI in the browser. The shared form connects Button, Input, Checkbox, a searchable Combobox, Dialog and Sheet. The component gallery also includes Switch, Textarea, RadioGroup and Alert.
 
 Repository: [zhanghan-13/shadcn-mobile](https://github.com/zhanghan-13/shadcn-mobile). The project includes Android/iOS hosts, shared components and an interactive documentation site.
 
@@ -10,6 +10,7 @@ Create a local demonstration workspace: enter its name and an email, search for 
 
 - Semantic zinc tokens with light/dark themes and a theme toggle.
 - Foundation-based buttons, text fields and checkbox rows; native Compose window containers for menus, dialogs and sheets.
+- Switch settings, multiline Textarea, mutually exclusive RadioGroup options and inline Alert messages, with shared interactive examples.
 - Minimum 48dp interactive targets, scalable text, focus/pressed/error/disabled/loading states.
 - Native IME Next/Done, scrollable form, safe-area and keyboard insets.
 - Search with no-results recovery; staged sheet edits that cancel on dismissal.
@@ -19,10 +20,10 @@ Create a local demonstration workspace: enter its name and an email, search for 
 
 ```text
 composeApp/                 Shared Kotlin Multiplatform library
-  src/commonMain/           Theme, components, complete form, validation
+  src/commonMain/           Theme, components, gallery, complete form, validation
   src/commonTest/           Form validation and search tests
   src/iosMain/              Compose UIViewController entry
-  src/wasmJsMain/           Browser entry, component gallery and bundled CJK font
+  src/wasmJsMain/           Browser entry and bundled CJK font
 androidApp/                 Android Activity, manifest and executable app
   src/androidTest/          Native emulator interaction and restoration tests
 iosApp/                     SwiftUI/UIKit host, XCUITest suite and shared Xcode scheme
@@ -66,7 +67,7 @@ Targets: `iosArm64` and `iosSimulatorArm64` (Apple silicon simulator), with iOS 
 
 Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. On **2026-10-18**, [iOS run 39112862050](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050) linked both Apple frameworks, built the Swift host and passed all **8 native UI tests**, with no failures, skips or retries. The run used an iPhone 17 Pro simulator on iOS 26.5, hosted macOS 26.6.2, Xcode 26.4.1 and Swift 6.3.1.
 
-The `iosAppUITests` suite covers validation, Chinese input through native Paste, role search, saved and discarded Sheet edits, keyboard Next/Done, review cancellation, submission/reset, theme changes and terms-dialog dismissal. Run it with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. **Physical-device testing, manual VoiceOver checks and larger Dynamic Type remain unverified.**
+The recorded eight-test suite covers validation, Chinese input through native Paste, role search, saved and discarded Sheet edits, keyboard Next/Done, review cancellation, submission/reset, theme changes and terms-dialog dismissal. That result covers the original form, not the added Switch, Textarea, RadioGroup or Alert. Run the current suite with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. **Physical-device testing, manual VoiceOver checks and larger Dynamic Type remain unverified.**
 
 ## Tests and evidence
 
@@ -74,7 +75,7 @@ See [native verification](docs/verification.md), [browser verification](docs/web
 
 ## Interactive documentation
 
-The documentation uses static HTML/CSS/JavaScript around a real Compose/Wasm preview. It includes the complete workspace form, six component examples, Kotlin usage snippets, searchable navigation, light/dark themes and quick-start guides. Browser previews share native component code; they do not emulate Android or iOS system UI.
+The documentation uses static HTML/CSS/JavaScript around a real Compose/Wasm preview. Its 13 routes include the complete workspace form, ten component examples, Kotlin usage snippets, searchable navigation, light/dark themes and quick-start guides. Browser previews share native component code; they do not emulate Android or iOS system UI.
 
 With Node.js 24 and the Java/Android SDK setup above:
 
@@ -93,7 +94,7 @@ The preview requires a browser with WebAssembly GC support. Native keyboard, ges
 Three workflows are prepared:
 
 - **Android:** build app/test APKs, verify shared tests actually ran, execute the API 35 emulator interaction suite, and upload APKs/reports/screenshots.
-- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute eight native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence. The recorded hosted run passed all eight tests without skips or retries.
+- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute the native UI suite serially in an iPhone simulator, and collect reports, screenshots and failure evidence. The recorded hosted run passed the original eight form tests; the added component tests await a hosted result.
 - **Docs and Pages:** build the shared Wasm preview and static documentation; pull requests build only, while `main` can deploy the validated artifact to Pages.
 
 Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [zhanghan-13.github.io/shadcn-mobile](https://zhanghan-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.

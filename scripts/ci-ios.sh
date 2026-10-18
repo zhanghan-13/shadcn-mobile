@@ -103,7 +103,7 @@ if [[ -d "$result_bundle" ]]; then
     > "$output/test-results.json" 2> "$output/test-results-errors.log" || evidence_status=1
   xcrun xcresulttool export attachments --path "$result_bundle" \
     --output-path "$output/attachments" > "$output/attachment-export.log" 2>&1 || evidence_status=1
-  python3 scripts/ci-check-ios-results.py "$output/test-results.json" iosAppUITests 8 \
+  python3 scripts/ci-check-ios-results.py "$output/test-results.json" iosAppUITests 13 \
     2>&1 | tee "$output/test-check.log" || evidence_status=1
 else
   printf 'Missing XCUITest result bundle: %s\n' "$result_bundle" >&2

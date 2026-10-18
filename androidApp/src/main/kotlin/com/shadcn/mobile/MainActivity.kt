@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            App(onThemeChanged = { dark ->
+            App(enableComponentGallery = true, onThemeChanged = { dark ->
                 val style = if (dark) SystemBarStyle.dark(Color.TRANSPARENT)
                     else SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)

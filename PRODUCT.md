@@ -9,7 +9,7 @@ adaptive
 User requested Android Compose and initial Android/iOS support. Compose Multiplatform shares Kotlin UI and form logic; Android uses a native Activity and iOS uses a thin SwiftUI/UIKit host. The documentation website runs the same components through Kotlin/Wasm and documents their Kotlin APIs.
 
 ## Product Purpose
-An executable prototype of six shadcn-inspired native components: Button, Input, Checkbox, Combobox, Dialog and Sheet, connected as one complete form.
+An executable prototype of ten shadcn-inspired native components. Button, Input, Checkbox, Combobox, Dialog and Sheet connect as one complete form. Switch, Textarea, RadioGroup and Alert extend the component gallery, with the same examples available on Android, iOS and the documentation website.
 
 ## Users
 Developers evaluating the visual language and native behavior of a mobile component library.

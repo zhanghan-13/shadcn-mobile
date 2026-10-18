@@ -19,11 +19,17 @@ for (const file of ['app.js', 'content.js']) {
 }
 for (const script of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) new Script(script[1]);
 
-assert.deepEqual(Object.keys(components), ['button', 'input', 'checkbox', 'combobox', 'dialog', 'sheet']);
-assert.equal(pages.length, 9);
+assert.deepEqual(Object.keys(components), ['button', 'input', 'checkbox', 'combobox', 'dialog', 'sheet', 'switch', 'textarea', 'radio-group', 'alert']);
+assert.equal(pages.length, 13);
 assert.equal(new Set(pages.map((page) => page.route)).size, pages.length);
 assert.equal(searchPages('按钮')[0].route, 'components/button');
 assert.equal(searchPages('SInput')[0].route, 'components/input');
+for (const [query, component] of [
+  ['开关', 'switch'], ['SSwitch', 'switch'],
+  ['多行 输入', 'textarea'], ['STextarea', 'textarea'],
+  ['单选组', 'radio-group'], ['radio group', 'radio-group'], ['RadioOption', 'radio-group'],
+  ['警告', 'alert'], ['SAlert', 'alert'], ['AlertVariant', 'alert'],
+]) assert.equal(searchPages(query)[0]?.route, `components/${component}`, `${query}: component is searchable`);
 assert.equal(searchPages('iOS')[0].route, 'installation');
 assert.equal(searchPages('THEME')[0].route, 'theming');
 assert.equal(searchPages('not-a-real-component').length, 0);
@@ -39,7 +45,22 @@ for (const [key, component] of Object.entries(components)) {
   const documented = component.signature.match(new RegExp(`fun ${component.name}\\(([\\s\\S]*)\\)$`))?.[1];
   assert.equal(normalize(documented), normalize(actual), `${key}: documented API differs from source`);
   assert.ok(component.sample.includes(`${component.name}(`), `${key}: example calls actual component`);
+  for (const type of component.types || []) {
+    const pattern = type.signature.startsWith('data class ')
+      ? new RegExp(`data class ${type.name}\\([\\s\\S]*?\\n\\)`)
+      : new RegExp(`enum class ${type.name}\\s*\\{[^}]*\\}`);
+    const actual = source.match(pattern)?.[0];
+    assert.ok(actual, `${type.name}: public type exists`);
+    assert.equal(normalize(type.signature), normalize(actual), `${type.name}: documented type differs from source`);
+  }
 }
+
+const gallery = await readFile(path.join(root, 'composeApp/src/commonMain/kotlin/com/shadcn/mobile/ComponentGallery.kt'), 'utf8');
+const registered = gallery.match(/componentNames\s*=\s*setOf\(([^)]*)\)/)?.[1];
+assert.ok(registered, 'shared gallery declares its preview keys');
+const previewKeys = [...registered.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+assert.deepEqual(previewKeys.toSorted(), Object.keys(components).toSorted(), 'every documented component has a shared preview');
+for (const key of previewKeys) assert.ok(gallery.includes(`"${key}" ->`), `${key}: shared preview renders an example`);
 
 const theme = await readFile(path.join(root, 'composeApp/src/commonMain/kotlin/com/shadcn/mobile/ui/Theme.kt'), 'utf8');
 for (const [name, light, dark] of tokens) {
@@ -65,4 +86,4 @@ if (process.argv.includes('--dist')) {
     await stat(path.resolve(demo, match[1].split('?')[0]));
   }
 }
-console.log(`Verified ${path.relative(root, directory)}: 9 routes, 6 exact Kotlin APIs, bilingual search, theme tokens, relative assets${process.argv.includes('--dist') ? ', packaged Wasm runtime' : ''}.`);
+console.log(`Verified ${path.relative(root, directory)}: ${pages.length} routes, ${Object.keys(components).length} exact Kotlin APIs, 2 related types, shared preview keys, bilingual search, theme tokens, relative assets${process.argv.includes('--dist') ? ', packaged Wasm runtime' : ''}.`);

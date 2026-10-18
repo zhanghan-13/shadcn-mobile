@@ -4,7 +4,7 @@
 The user explicitly requested shadcn style. This is a native translation of that established visual language, with Android/iOS input and window behavior. No alternative visual identity is introduced.
 
 ## Surface
-Operate mode: a focused workspace setup form. Header with project mark and theme control, a clear title and short explanation, a vertically ordered form, notification preferences as a dismissible sheet, review as a confirmation dialog, then a local success summary.
+Operate mode: a focused workspace setup form and a shared component gallery. The form has a header with project mark and theme control, a clear title and short explanation, vertically ordered fields, notification preferences as a dismissible sheet, review as a confirmation dialog, then a local success summary. The gallery adds independent Switch, Textarea, RadioGroup and Alert examples alongside the six form components.
 
 ## Visual system
 - Zinc neutrals; near-black primary action on white, inverted in dark mode.
@@ -18,7 +18,7 @@ Operate mode: a focused workspace setup form. Header with project mark and theme
 Shared Foundation input and toggle semantics, Material3 sheets, and Compose Dialog for confirmation and searchable selection. The role picker uses a scrollable dialog so results remain available above the iOS keyboard. Native safe drawing and IME insets. State survives Android recreation using saveable state. Sheet changes are staged until saved; dismissal discards pending changes.
 
 ## Documentation surface
-Read mode, retaining the same zinc palette and restrained borders. Desktop uses a persistent component directory, focused reading column and page contents; small screens use an accessible collapsible directory. The complete form and six component pages embed the real shared Compose code compiled to Wasm. Kotlin examples, search, copy actions, theme selection and direct hash links support trying and adopting the components. Browser preview is identified separately from native device verification.
+Read mode, retaining the same zinc palette and restrained borders. Desktop uses a persistent component directory, focused reading column and page contents; small screens use an accessible collapsible directory. The complete form and ten component pages embed the real shared Compose code compiled to Wasm. Kotlin examples, search, copy actions, theme selection and direct hash links support trying and adopting the components. Browser preview is identified separately from native device verification.
 
 ## Verification
-Android emulator: complete flow, required fields, searchable role picker, no-results recovery, sheet save/cancel/back, dialog cancel/back, disabled submission, dark theme, large text, rotation/restoration, screenshot review. iOS: eight native XCUITests passed on iPhone 17 Pro / iOS 26.5 in hosted macOS CI, covering the form, keyboard Next/Done, search, sheets, dialogs, themes and reset. Physical devices, manual VoiceOver and larger Dynamic Type remain unverified.
+Android emulator: complete flow, required fields, searchable role picker, no-results recovery, sheet save/cancel/back, dialog cancel/back, disabled submission, dark theme, large text, rotation/restoration, screenshot review. iOS: eight native XCUITests passed on iPhone 17 Pro / iOS 26.5 in hosted macOS CI, covering the form, keyboard Next/Done, search, sheets, dialogs, themes and reset. These recorded results cover the original form, not the four added components. Physical devices, manual VoiceOver and larger Dynamic Type remain unverified.

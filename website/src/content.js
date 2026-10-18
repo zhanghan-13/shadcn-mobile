@@ -188,13 +188,144 @@ fun PreferencesSheet(
 )`,
     props: [['initialEmailUpdates', 'Boolean', '工作空间更新的初始状态。'], ['initialProductNews', 'Boolean', '产品动态的初始状态。'], ['onDismiss', '() -> Unit', '关闭面板，不应用待保存修改。'], ['onSave', '(Boolean, Boolean) -> Unit', '依次返回工作空间更新、产品动态的选择。']],
   },
+  switch: {
+    title: 'Switch', zh: '开关', name: 'SSwitch', source: 'ui/FormComponents.kt',
+    description: '用开关表示立即生效的设置。标签、说明与开关组成一个可操作的整行，状态和保存方式由调用方决定。',
+    summary: '开关状态、整行操作与禁用',
+    behavior: ['checked 由调用方持有，点击整行后通过 onCheckedChange 返回新状态。', '交互区域至少 48dp，整行合并为一个 Switch 语义节点。', 'enabled 为 false 时保留当前状态并阻止切换；说明文字可以换行。'],
+    sample: `@Composable
+fun SwitchExample() {
+    var enabled by rememberSaveable { mutableStateOf(false) }
+
+    SSwitch(
+        checked = enabled,
+        onCheckedChange = { enabled = it },
+        label = "接收工作空间更新",
+        description = "成员邀请与协作进展发生时通知我。",
+    )
+}`,
+    signature: `@Composable
+fun SSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String,
+    description: String? = null,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    testTag: String = "",
+)`,
+    props: [['checked / onCheckedChange', 'Boolean / (Boolean) -> Unit', '控制开关状态，响应整行点击。'], ['label', 'String', '可见标签与可访问名称。'], ['description', 'null', '标签下方的补充说明。'], ['modifier', 'Modifier', '控制外部布局。'], ['enabled', 'true', 'false 时禁止切换。'], ['testTag', '""', '用于定位 Compose UI 测试节点。']],
+  },
+  textarea: {
+    title: 'Textarea', zh: '多行输入框', name: 'STextarea', source: 'ui/FormComponents.kt',
+    description: '用于介绍、备注等多行文本。保留可见标签、焦点描边和错误信息，支持只读与禁用状态。',
+    summary: '多行文本、只读与错误反馈',
+    behavior: ['Enter 可以输入换行；minLines 与 maxLines 控制可见行数，须满足 1 ≤ minLines ≤ maxLines。文本状态由调用方持有。', 'readOnly 保留文本选择和复制，阻止编辑；enabled 为 false 时禁用输入。', '标签和错误信息进入辅助功能语义。键盘类型与动作由 keyboardOptions、keyboardActions 配置。'],
+    sample: `@Composable
+fun TextareaExample() {
+    var introduction by rememberSaveable { mutableStateOf("") }
+
+    STextarea(
+        value = introduction,
+        onValueChange = { introduction = it },
+        label = "工作空间介绍",
+        placeholder = "介绍团队正在做的事，可以分行填写。",
+        minLines = 3,
+        maxLines = 6,
+    )
+}`,
+    signature: `@Composable
+fun STextarea(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    error: String? = null,
+    minLines: Int = 3,
+    maxLines: Int = 6,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester? = null,
+    testTag: String = "",
+)`,
+    props: [['value / onValueChange', 'String / (String) -> Unit', '多行文本由调用方持有。'], ['label', 'String', '可见标签与可访问名称。'], ['modifier', 'Modifier', '控制宽度和外部布局。'], ['placeholder', '""', '空值时的提示，不替代标签。'], ['error', 'null', '错误描边与说明文字。'], ['minLines / maxLines', '3 / 6', '可见行数范围。'], ['enabled', 'true', '是否允许交互。'], ['readOnly', 'false', '保留选择与复制，阻止编辑。'], ['keyboardOptions / keyboardActions', 'Default', '系统键盘类型与 IME 动作。'], ['focusRequester', 'null', '由外部请求焦点。'], ['testTag', '""', '用于定位 Compose UI 测试节点。']],
+  },
+  'radio-group': {
+    title: 'RadioGroup', zh: '单选组', name: 'SRadioGroup', source: 'ui/FormComponents.kt',
+    description: '从一组选项中选择一项。每行可以带说明，支持禁用单个选项或整个组，适合方案与偏好选择。',
+    summary: '互斥选择、选项说明与禁用',
+    behavior: ['selectedId 为 null 时不选中任何项；选择后通过 onSelect 返回选项 ID。', '整行均可选择，选项提供 RadioButton 语义，组使用 selectableGroup。', 'RadioOption.enabled 控制单项，组件 enabled 控制整个组；两者均启用时才能选择。'],
+    sample: `@Composable
+fun RadioGroupExample() {
+    var plan by rememberSaveable { mutableStateOf<String?>("free") }
+    val plans = listOf(
+        RadioOption("free", "个人", "适合个人项目与灵感记录。"),
+        RadioOption("pro", "团队", "与团队一起整理和推进工作。"),
+        RadioOption("enterprise", "企业", "暂未开放。", enabled = false),
+    )
+
+    SRadioGroup(
+        options = plans,
+        selectedId = plan,
+        onSelect = { plan = it },
+        label = "选择方案",
+    )
+}`,
+    signature: `@Composable
+fun SRadioGroup(
+    options: List<RadioOption>,
+    selectedId: String?,
+    onSelect: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+    enabled: Boolean = true,
+    testTag: String = "",
+)`,
+    props: [['options', 'List<RadioOption>', '选项的 ID、标签、说明与启用状态。'], ['selectedId', 'String?', '已选选项的 ID；null 表示未选择。'], ['onSelect', '(String) -> Unit', '返回用户选择的选项 ID。'], ['label', 'String', '组的可见标签。'], ['modifier', 'Modifier', '控制外部布局。'], ['error', 'null', '显示组级错误说明。'], ['enabled', 'true', 'false 时禁用所有选项。'], ['testTag', '""', '用于定位 Compose UI 测试节点。']],
+    types: [{ name: 'RadioOption', description: '同一组内的 ID 必须唯一；enabled 可以单独禁用某一项。', signature: `data class RadioOption(
+    val id: String,
+    val label: String,
+    val description: String? = null,
+    val enabled: Boolean = true,
+)` }],
+  },
+  alert: {
+    title: 'Alert', zh: '提示信息', name: 'SAlert', source: 'ui/FormComponents.kt',
+    description: '在页面中展示提示或警告。标题和说明一起呈现，可选择普通或危险样式，并按需请求辅助功能播报。',
+    summary: '页面提示、危险样式与动态播报',
+    behavior: ['Default 用于一般说明，Destructive 用于错误或需要注意的情况。', '内容直接显示在页面内，不打开弹窗、不阻断当前任务。', 'announce 默认为 false；开启后使用 live region 语义。实际播报行为仍需用目标设备的读屏工具验证。'],
+    note: '预览中的“重试保存”只切换本地提示状态，不会发送网络请求。',
+    sample: `@Composable
+fun AlertExample() {
+    SAlert(
+        title = "暂时无法保存",
+        description = "请检查网络连接后重试。当前输入仍会保留。",
+        variant = AlertVariant.Destructive,
+        announce = true,
+    )
+}`,
+    signature: `@Composable
+fun SAlert(
+    title: String,
+    description: String? = null,
+    modifier: Modifier = Modifier,
+    variant: AlertVariant = AlertVariant.Default,
+    announce: Boolean = false,
+)`,
+    props: [['title', 'String', '提示标题。'], ['description', 'null', '标题下方的补充说明。'], ['modifier', 'Modifier', '控制宽度和外部布局。'], ['variant', 'AlertVariant.Default', 'Default / Destructive。'], ['announce', 'false', '为动态内容启用 live region 语义。']],
+    types: [{ name: 'AlertVariant', description: '选择普通提示或危险提示的文字与描边颜色。', signature: `enum class AlertVariant { Default, Destructive }` }],
+  },
 };
 
 export const pages = [
-  { route: 'overview', title: '介绍与体验', category: '开始使用', description: '体验六个组件串联的完整表单', keywords: '介绍 入门 完整表单 在线体验 demo form overview' },
+  { route: 'overview', title: '介绍与体验', category: '开始使用', description: '体验完整表单与十个组件示例', keywords: '介绍 入门 完整表单 在线体验 demo form overview' },
   { route: 'installation', title: '快速开始', category: '开始使用', description: '在 Android 与 iOS 运行项目', keywords: '安装 运行 Android iOS Gradle Xcode Kotlin 下载 clone installation' },
   { route: 'theming', title: '主题与令牌', category: '开始使用', description: 'Zinc 配色、深浅主题与自定义', keywords: '主题 深色 浅色 配色 color theme token zinc' },
-  ...Object.entries(components).map(([key, entry]) => ({ route: `components/${key}`, title: entry.title, zh: entry.zh, category: '组件', description: entry.summary, keywords: `${key} ${entry.zh} ${entry.name} ${entry.description}` })),
+  ...Object.entries(components).map(([key, entry]) => ({ route: `components/${key}`, title: entry.title, zh: entry.zh, category: '组件', description: entry.summary, keywords: `${key} ${entry.zh} ${entry.name} ${entry.description} ${(entry.types || []).map((type) => type.name).join(' ')}` })),
 ];
 
 export const tokens = [
