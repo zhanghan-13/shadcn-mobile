@@ -525,7 +525,9 @@ final class WorkspaceFlowTests: XCTestCase {
     }
 
     @MainActor private func expectKeyboardHidden() {
-        expect(app.keyboards.element, "exists == false")
+        // On a fresh hosted simulator, the first keyboard dismissal can take longer
+        // to reach the AX tree. Wait for the same state without repeating the action.
+        expect(app.keyboards.element, "exists == false", timeout: 15)
     }
 
     @MainActor private func expectSummary(name: String, preferences: String) {
@@ -570,10 +572,10 @@ final class WorkspaceFlowTests: XCTestCase {
         expect(element(tag), "exists == false")
     }
 
-    @MainActor private func expect(_ target: XCUIElement, _ format: String, _ arguments: CVarArg...) {
+    @MainActor private func expect(_ target: XCUIElement, _ format: String, _ arguments: CVarArg..., timeout: TimeInterval = 8) {
         let predicate = NSPredicate(format: format, arguments: getVaList(arguments))
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: target)
-        let result = XCTWaiter.wait(for: [expectation], timeout: 8)
+        let result = XCTWaiter.wait(for: [expectation], timeout: timeout)
         if result != .completed {
             print("UI assertion expected: \(predicate.predicateFormat)")
             if target.exists {
