@@ -384,7 +384,6 @@ private fun ComposeContentTestRule.selectDeveloper(captureScreenshot: Boolean = 
 
 /** Manual review evidence only; no screenshot pixels are used as test assertions. */
 private fun ComposeContentTestRule.captureEvidence(name: String, tag: String? = null) {
-    closeSoftKeyboard()
     waitForIdle()
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     val externalFiles = requireNotNull(instrumentation.targetContext.getExternalFilesDir(null)) {
