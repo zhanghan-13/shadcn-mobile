@@ -68,8 +68,8 @@ simulator_started=1
 xcrun simctl bootstatus "$simulator_id" -b
 xcrun simctl ui "$simulator_id" appearance light
 
-# One selected device, one UI target, one execution per test. CLI repetition
-# settings override the scheme; do not add -retry-tests-on-failure.
+# One selected device and one UI target. Xcode runs tests once by default;
+# do not add repetition or -retry-tests-on-failure settings.
 # Timeout flags are documented in Apple's Xcode 11.4 Testing release notes:
 # https://developer.apple.com/documentation/xcode-release-notes/xcode-11_4-release-notes
 set +e
@@ -85,7 +85,6 @@ xcodebuild test \
   -only-testing:iosAppUITests \
   -parallel-testing-enabled NO \
   -maximum-concurrent-test-simulator-destinations 1 \
-  -test-iterations 1 \
   -test-timeouts-enabled YES \
   -default-test-execution-time-allowance 180 \
   -maximum-test-execution-time-allowance 300 \
