@@ -64,6 +64,8 @@ final class WorkspaceFlowTests: XCTestCase {
 
     @MainActor
     func testCompleteChineseWorkspaceReviewAndReset() {
+        // This full flow can exceed three minutes on a fresh hosted simulator while still making progress.
+        executionTimeAllowance = 300
         capture("01-form")
         pasteChineseWorkspaceName()
         type("email", "hello@example.com")
