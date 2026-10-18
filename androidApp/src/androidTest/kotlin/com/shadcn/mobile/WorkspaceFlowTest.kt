@@ -1,6 +1,7 @@
 package com.shadcn.mobile
 
 import android.graphics.Bitmap
+import android.view.KeyEvent
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -57,7 +58,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.shadcn.mobile.ui.*
 import androidx.test.espresso.Espresso.closeSoftKeyboard
-import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
@@ -190,24 +190,24 @@ class WorkspaceFlowTest {
         compose.onNodeWithTag("role_trigger").performScrollTo().performClick()
         compose.onNodeWithTag("role_search").assertExists()
         closeSoftKeyboard()
-        pressBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("role_search").assertDoesNotExist()
 
         compose.onNodeWithTag("preferences_button").performScrollTo().performClick()
         compose.onNodeWithTag("preferences_sheet").assertIsDisplayed()
         compose.onNodeWithTag("product_news").performClick().assertIsOn()
-        pressBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("preferences_sheet").assertDoesNotExist()
         compose.onNodeWithTag("preferences_button").performScrollTo().performClick()
         compose.onNodeWithTag("product_news").assertIsOff()
-        pressBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("preferences_sheet").assertDoesNotExist()
 
         compose.selectDeveloper()
         compose.onNodeWithTag("terms_checkbox").performScrollTo().performClick()
         compose.onNodeWithTag("submit_button").performScrollTo().performClick()
         compose.onNodeWithTag("review_dialog").assertIsDisplayed()
-        pressBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("review_dialog").assertDoesNotExist()
         compose.onNodeWithTag("workspace_name").performScrollTo().assertTextEquals("设计工作室")
         compose.onNodeWithTag("email").performScrollTo().assertTextEquals("hello@example.com")
@@ -394,12 +394,12 @@ class WorkspaceFlowTest {
         compose.onNodeWithTag("theme_toggle").performClick()
         openComponent("switch")
         compose.onNodeWithTag("switch_updates").performClick().assertIsOn()
-        pressBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("catalog_switch").performScrollTo().performClick()
         compose.onNodeWithTag("switch_updates").assertIsOn()
         compose.onNodeWithTag("switch_count").assertTextEquals("已切换 1 次")
         compose.onNodeWithTag("component_back").performClick()
-        pressBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("workspace_name").performScrollTo().assertTextEquals("设计工作室")
         compose.onNodeWithTag("email").performScrollTo().assertTextEquals("hello@example.com")
         compose.onNodeWithTag("terms_checkbox").performScrollTo().assertIsOn()
@@ -417,8 +417,8 @@ class WorkspaceFlowTest {
         closeSoftKeyboard()
         compose.activityRule.scenario.recreate()
         compose.onNodeWithTag("textarea_notes").performScrollTo().assertTextEquals("保留草稿\n第二行")
-        pressBack()
-        pressBack()
+        compose.pressSystemBack()
+        compose.pressSystemBack()
         compose.onNodeWithTag("workspace_name").performScrollTo().assertTextEquals("设计工作室")
         compose.onNodeWithTag("email").performScrollTo().assertTextEquals("hello@example.com")
     }
@@ -552,6 +552,13 @@ class WorkspaceStateRestorationTest {
         compose.onNodeWithTag("submit_button").performScrollTo().performClick()
         compose.onNodeWithTag("review_dialog").assertIsDisplayed()
     }
+}
+
+/** Send Back to the focused window, including dialogs, without Espresso's Activity-root selection. */
+private fun ComposeContentTestRule.pressSystemBack() {
+    waitForIdle()
+    InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+    waitForIdle()
 }
 
 private fun ComposeContentTestRule.enterWorkspaceDetails() {
