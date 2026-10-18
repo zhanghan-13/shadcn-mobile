@@ -25,7 +25,7 @@ composeApp/                 Shared Kotlin Multiplatform library
   src/wasmJsMain/           Browser entry, component gallery and bundled CJK font
 androidApp/                 Android Activity, manifest and executable app
   src/androidTest/          Native emulator interaction and restoration tests
-iosApp/                     SwiftUI/UIKit host and shared Xcode scheme
+iosApp/                     SwiftUI/UIKit host, XCUITest suite and shared Xcode scheme
 docs/                       Verification notes and captured emulator screenshots
 website/src/                Chinese documentation, navigation and preview frames
 scripts/                    Local builds, preview server and CI checks
@@ -66,6 +66,8 @@ Targets: `iosArm64` and `iosSimulatorArm64` (Apple silicon simulator), with iOS 
 
 Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. The [hosted macOS check](https://github.com/hanzhang-13/shadcn-mobile/actions/runs/39045335671) also linked both Apple frameworks, built the Swift host and launched the app in an iPhone simulator. It checked that the app process remained alive and captured a startup screenshot. **This is a build and launch smoke check; iOS form interactions, keyboard behavior and VoiceOver still need device testing.**
 
+The `iosAppUITests` target now includes eight native form interaction tests. Run them with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. The first hosted run of this suite is pending; adding tests alone is not evidence that those interactions pass.
+
 ## Tests and evidence
 
 See [native verification](docs/verification.md), [browser verification](docs/web-verification.md) and [CI configuration checks](docs/ci-validation.md) for the tested environments, results and remaining checks. Android instrumentation screenshots are written to the app's external-files `screenshots` directory, and selected captures are copied to `docs/screenshots/`.
@@ -91,7 +93,7 @@ The preview requires a browser with WebAssembly GC support. Native keyboard, ges
 Three workflows are prepared:
 
 - **Android:** build app/test APKs, verify shared tests actually ran, execute the API 35 emulator interaction suite, and upload APKs/reports/screenshots.
-- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, launch an iPhone simulator and collect a startup screenshot. This is a smoke test, not complete iOS interaction coverage.
+- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute eight native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence. The recorded hosted result currently covers the earlier smoke test.
 - **Docs and Pages:** build the shared Wasm preview and static documentation; pull requests build only, while `main` can deploy the validated artifact to Pages.
 
 Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [hanzhang-13.github.io/shadcn-mobile](https://hanzhang-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/hanzhang-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.

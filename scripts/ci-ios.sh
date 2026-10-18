@@ -6,57 +6,117 @@ if [[ "$(uname -s)" != Darwin || "$(uname -m)" != arm64 ]]; then
   printf 'iOS CI requires macOS on Apple silicon.\n' >&2
   exit 1
 fi
-output="$PWD/build/ci/ios"
-mkdir -p "$output"
+mkdir -p "$PWD/build/ci/ios"
+# A new directory prevents a previous local run from supplying stale evidence.
+output=$(mktemp -d "$PWD/build/ci/ios/run-XXXXXXXX")
+result_bundle="$output/ui-tests.xcresult"
+derived_data="$PWD/build/ci/ios-derived-data"
+simulator_id=''
+simulator_started=0
+cleanup() {
+  status=$?
+  trap - EXIT
+  if (( simulator_started == 1 )); then
+    xcrun simctl io "$simulator_id" screenshot "$output/ios-final-screen.png" \
+      >> "$output/simulator-cleanup.log" 2>&1 || true
+    xcrun simctl shutdown "$simulator_id" >> "$output/simulator-cleanup.log" 2>&1 || true
+  fi
+  exit "$status"
+}
+trap cleanup EXIT
 xcodebuild -version | tee "$output/toolchain.log"
 xcrun swift --version | tee -a "$output/toolchain.log"
+xcrun xcresulttool version | tee -a "$output/toolchain.log"
+# Apple documents these help commands as the source of the JSON output schema:
+# https://developer.apple.com/documentation/xcode-release-notes/xcode-16_3-release-notes
+xcrun xcresulttool help get test-results tests > "$output/xcresulttool-tests-help.log"
+xcrun xcresulttool help get test-results summary > "$output/xcresulttool-summary-help.log"
+python3 scripts/test-ci-ios-results.py 2>&1 | tee "$output/report-checker-tests.log"
 
 # Check both Apple framework targets; the Xcode build phase then embeds the
 # simulator framework using the same integration as local Xcode development.
 bash ./gradlew :composeApp:linkDebugFrameworkIosArm64 :composeApp:linkDebugFrameworkIosSimulatorArm64 \
   --stacktrace --console=plain --max-workers=2 | tee "$output/framework-build.log"
-xcodebuild \
-  -project iosApp/iosApp.xcodeproj \
-  -scheme iosApp \
-  -configuration Debug \
-  -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  -derivedDataPath "$output/DerivedData" \
-  -resultBundlePath "$output/build.xcresult" \
-  ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO \
-  build | tee "$output/host-build.log"
-ditto -c -k --keepParent \
-  "$output/DerivedData/Build/Products/Debug-iphonesimulator/shadcn-mobile.app" \
-  "$output/shadcn-mobile-simulator.zip"
 
-# Choose an installed iPhone rather than hard-coding a device name that changes
-# as GitHub refreshes its image. Prefer the most recent available iOS runtime.
+# Choose a shutdown iPhone, leaving a local developer's already-running device
+# alone. Only a simulator successfully booted below is eligible for cleanup.
+# Prefer the most recent available iOS runtime without hard-coding its name.
 xcrun simctl list devices available --json > "$output/simulators.json"
 simulator_id=$(python3 - "$output/simulators.json" <<'PY'
 import json
+import re
 import sys
 
 with open(sys.argv[1], encoding="utf-8") as source:
     runtimes = json.load(source)["devices"]
-for runtime in sorted(runtimes, reverse=True):
+def version(runtime):
+    return tuple(int(part) for part in re.findall(r"\d+", runtime))
+
+for runtime in sorted(runtimes, key=version, reverse=True):
     if ".iOS-" not in runtime:
         continue
     for device in runtimes[runtime]:
-        if device.get("isAvailable") and device["name"].startswith("iPhone"):
+        if (device.get("isAvailable") and device.get("state") == "Shutdown"
+                and device["name"].startswith("iPhone")):
             print(device["udid"])
             raise SystemExit(0)
-raise SystemExit("No available iPhone simulator runtime")
+raise SystemExit("No available shutdown iPhone simulator; existing booted devices were left untouched")
 PY
 )
 xcrun simctl boot "$simulator_id"
+simulator_started=1
 xcrun simctl bootstatus "$simulator_id" -b
 xcrun simctl ui "$simulator_id" appearance light
-xcrun simctl install "$simulator_id" "$output/DerivedData/Build/Products/Debug-iphonesimulator/shadcn-mobile.app"
-launch_result=$(xcrun simctl launch "$simulator_id" com.shadcn.mobile)
-printf '%s\n' "$launch_result" | tee "$output/launch.log"
-app_pid=$(printf '%s\n' "$launch_result" | awk '{print $NF}')
-sleep 5
-xcrun simctl spawn "$simulator_id" launchctl list > "$output/processes.log"
-awk -v expected="$app_pid" '$1 == expected { found = 1 } END { exit !found }' "$output/processes.log"
-xcrun simctl io "$simulator_id" screenshot "$output/ios-form.png"
-xcrun simctl shutdown "$simulator_id"
+
+# One selected device, one UI target, one execution per test. CLI repetition
+# settings override the scheme; do not add -retry-tests-on-failure.
+# Timeout flags are documented in Apple's Xcode 11.4 Testing release notes:
+# https://developer.apple.com/documentation/xcode-release-notes/xcode-11_4-release-notes
+set +e
+xcodebuild test \
+  -project iosApp/iosApp.xcodeproj \
+  -scheme iosApp \
+  -configuration Debug \
+  -sdk iphonesimulator \
+  -destination "platform=iOS Simulator,id=$simulator_id" \
+  -destination-timeout 120 \
+  -derivedDataPath "$derived_data" \
+  -resultBundlePath "$result_bundle" \
+  -only-testing:iosAppUITests \
+  -parallel-testing-enabled NO \
+  -maximum-concurrent-test-simulator-destinations 1 \
+  -test-iterations 1 \
+  -test-timeouts-enabled YES \
+  -default-test-execution-time-allowance 180 \
+  -maximum-test-execution-time-allowance 300 \
+  ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO \
+  2>&1 | tee "$output/ui-tests.log"
+pipeline_status=("${PIPESTATUS[@]}")
+set -e
+
+# Export evidence even when xcodebuild fails. The original failure is retained;
+# missing/unreadable reports and attachment export failures also fail the job.
+evidence_status=0
+if [[ -d "$result_bundle" ]]; then
+  xcrun xcresulttool get test-results summary --path "$result_bundle" \
+    > "$output/test-summary.json" 2> "$output/test-summary-errors.log" || evidence_status=1
+  xcrun xcresulttool get test-results tests --path "$result_bundle" \
+    > "$output/test-results.json" 2> "$output/test-results-errors.log" || evidence_status=1
+  xcrun xcresulttool export attachments --path "$result_bundle" \
+    --output-path "$output/attachments" > "$output/attachment-export.log" 2>&1 || evidence_status=1
+  python3 scripts/ci-check-ios-results.py "$output/test-results.json" iosAppUITests 8 \
+    2>&1 | tee "$output/test-check.log" || evidence_status=1
+else
+  printf 'Missing XCUITest result bundle: %s\n' "$result_bundle" >&2
+  evidence_status=1
+fi
+
+app="$derived_data/Build/Products/Debug-iphonesimulator/shadcn-mobile.app"
+if [[ -d "$app" ]]; then
+  ditto -c -k --keepParent "$app" "$output/shadcn-mobile-simulator.zip" || evidence_status=1
+fi
+if (( pipeline_status[0] != 0 || pipeline_status[1] != 0 || evidence_status != 0 )); then
+  printf 'iOS CI failed: xcodebuild=%s, log=%s, evidence=%s\n' \
+    "${pipeline_status[0]}" "${pipeline_status[1]}" "$evidence_status" >&2
+  exit 1
+fi

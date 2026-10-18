@@ -3,9 +3,9 @@ name: iOS
 on:
   push:
     branches: [main]
-    paths: ["iosApp/**", "composeApp/**", "gradle/**", "*.gradle.kts", "gradle.properties", "gradlew", "scripts/ci-ios.sh", ".github/workflows/ios.yml"]
+    paths: ["iosApp/**", "composeApp/**", "gradle/**", "*.gradle.kts", "gradle.properties", "gradlew", "scripts/ci-ios.sh", "scripts/ci-check-ios-results.py", "scripts/test-ci-ios-results.py", ".github/workflows/ios.yml"]
   pull_request:
-    paths: ["iosApp/**", "composeApp/**", "gradle/**", "*.gradle.kts", "gradle.properties", "gradlew", "scripts/ci-ios.sh", ".github/workflows/ios.yml"]
+    paths: ["iosApp/**", "composeApp/**", "gradle/**", "*.gradle.kts", "gradle.properties", "gradlew", "scripts/ci-ios.sh", "scripts/ci-check-ios-results.py", "scripts/test-ci-ios-results.py", ".github/workflows/ios.yml"]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   simulator:
-    name: Apple framework, Swift host and simulator launch
+    name: Apple frameworks and native iOS UI tests
     # Standard Apple silicon runner; no large/xlarge paid runner or matrix.
     runs-on: macos-26
     timeout-minutes: 45
@@ -35,18 +35,13 @@ jobs:
         with:
           cache-provider: basic
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-      - name: Build and launch the iOS simulator host
+      - name: Build frameworks and run iOS UI tests serially
         run: bash scripts/ci-ios.sh
-      - name: Upload simulator build and smoke-test evidence
+      - name: Upload iOS UI test results and screenshots
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ios-simulator-results
-          path: |
-            build/ci/ios/*.log
-            build/ci/ios/*.json
-            build/ci/ios/*.png
-            build/ci/ios/*.zip
-            build/ci/ios/*.xcresult/
+          path: build/ci/ios/
           if-no-files-found: warn
           retention-days: 7

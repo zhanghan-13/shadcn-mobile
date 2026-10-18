@@ -129,7 +129,7 @@ fun PreferencesSheet(initialEmailUpdates: Boolean, initialProductNews: Boolean, 
     ModalBottomSheet(
         onDismissRequest = onDismiss, sheetState = state, containerColor = colors.surface,
         contentColor = colors.foreground, tonalElevation = 0.dp, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp, bottom = 6.dp).size(36.dp, 4.dp).background(colors.border, RoundedCornerShape(2.dp))) },
+        dragHandle = { Box(Modifier.padding(top = 12.dp, bottom = 6.dp).size(36.dp, 4.dp).testTag("preferences_drag_handle").background(colors.border, RoundedCornerShape(2.dp))) },
     ) {
         Column(Modifier.fillMaxWidth().testTag("preferences_sheet").verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp).padding(top = 18.dp, bottom = 24.dp)) {

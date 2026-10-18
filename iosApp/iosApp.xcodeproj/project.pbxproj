@@ -8,13 +8,26 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* ShadcnMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* ShadcnMobileApp.swift */; };
 		A10000000000000000000002 /* ComposeRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ComposeRootView.swift */; };
+		C10000000000000000000001 /* WorkspaceFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000001 /* WorkspaceFlowTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C30000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A80000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A50000000000000000000001;
+			remoteInfo = iosApp;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* ShadcnMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadcnMobileApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ComposeRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeRootView.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A20000000000000000000004 /* shadcn-mobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "shadcn-mobile.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C20000000000000000000001 /* WorkspaceFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceFlowTests.swift; sourceTree = "<group>"; };
+		C20000000000000000000002 /* iosAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iosAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -24,12 +37,13 @@
 			files = ();
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C40000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		A40000000000000000000001 = {
 			isa = PBXGroup;
-			children = (A40000000000000000000002 /* iosApp */, A40000000000000000000003 /* Products */);
+			children = (A40000000000000000000002 /* iosApp */, C50000000000000000000001 /* iosAppUITests */, A40000000000000000000003 /* Products */);
 			sourceTree = "<group>";
 		};
 		A40000000000000000000002 /* iosApp */ = {
@@ -40,8 +54,14 @@
 		};
 		A40000000000000000000003 /* Products */ = {
 			isa = PBXGroup;
-			children = (A20000000000000000000004 /* shadcn-mobile.app */);
+			children = (A20000000000000000000004 /* shadcn-mobile.app */, C20000000000000000000002 /* iosAppUITests.xctest */);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C50000000000000000000001 /* iosAppUITests */ = {
+			isa = PBXGroup;
+			children = (C20000000000000000000001 /* WorkspaceFlowTests.swift */);
+			path = iosAppUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -58,6 +78,17 @@
 			productReference = A20000000000000000000004 /* shadcn-mobile.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C60000000000000000000001 /* iosAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C90000000000000000000001 /* Build configuration list for PBXNativeTarget "iosAppUITests" */;
+			buildPhases = (C70000000000000000000001 /* Sources */, C40000000000000000000001 /* Frameworks */, C70000000000000000000002 /* Resources */);
+			buildRules = ();
+			dependencies = (C80000000000000000000001 /* PBXTargetDependency */);
+			name = iosAppUITests;
+			productName = iosAppUITests;
+			productReference = C20000000000000000000002 /* iosAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -67,7 +98,10 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
-				TargetAttributes = {A50000000000000000000001 = {CreatedOnToolsVersion = 26.4; }; };
+				TargetAttributes = {
+					A50000000000000000000001 = {CreatedOnToolsVersion = 26.4; };
+					C60000000000000000000001 = {CreatedOnToolsVersion = 26.4; TestTargetID = A50000000000000000000001; };
+				};
 			};
 			buildConfigurationList = A90000000000000000000001 /* Build configuration list for PBXProject "iosApp" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -78,12 +112,13 @@
 			productRefGroup = A40000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (A50000000000000000000001 /* iosApp */);
+			targets = (A50000000000000000000001 /* iosApp */, C60000000000000000000001 /* iosAppUITests */);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A60000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C70000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -108,9 +143,44 @@
 			files = (A10000000000000000000001 /* ShadcnMobileApp.swift in Sources */, A10000000000000000000002 /* ComposeRootView.swift in Sources */);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C70000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (C10000000000000000000001 /* WorkspaceFlowTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C80000000000000000000001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = A50000000000000000000001 /* iosApp */; targetProxy = C30000000000000000000001 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		D10000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shadcn.mobile.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = iosApp;
+			};
+			name = Debug;
+		};
+		D10000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shadcn.mobile.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = iosApp;
+			};
+			name = Release;
+		};
 		B10000000000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -192,6 +262,7 @@
 /* Begin XCConfigurationList section */
 		A90000000000000000000001 = {isa = XCConfigurationList; buildConfigurations = (B10000000000000000000001 /* Debug */, B10000000000000000000002 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		A90000000000000000000002 = {isa = XCConfigurationList; buildConfigurations = (B10000000000000000000003 /* Debug */, B10000000000000000000004 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		C90000000000000000000001 = {isa = XCConfigurationList; buildConfigurations = (D10000000000000000000001 /* Debug */, D10000000000000000000002 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 	};
 	rootObject = A80000000000000000000001 /* Project object */;

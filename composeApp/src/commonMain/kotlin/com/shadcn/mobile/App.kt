@@ -150,7 +150,7 @@ private fun WorkspaceScreen(dark: Boolean, onToggleTheme: () -> Unit) {
                         Column(Modifier.weight(1f)) {
                             Text("通知偏好", color = colors.foreground, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                             Spacer(Modifier.height(3.dp))
-                            Text(preferencesDescription(values), color = colors.mutedForeground, fontSize = 12.sp, lineHeight = 18.sp)
+                            Text(preferencesDescription(values), Modifier.testTag("preferences_description"), color = colors.mutedForeground, fontSize = 12.sp, lineHeight = 18.sp)
                         }
                         SIcon("chevron-right", size = 17.dp)
                     }
@@ -206,7 +206,7 @@ private fun WorkspaceScreen(dark: Boolean, onToggleTheme: () -> Unit) {
             Text("你填写的信息只保留在当前演示状态中，不会发送到服务器，也不会创建真实账户。关闭演示后无需处理任何订阅或费用。",
                 color = colors.mutedForeground, fontSize = 14.sp, lineHeight = 23.sp)
             Spacer(Modifier.height(24.dp))
-            SButton("我知道了", { termsOpen = false }, Modifier.fillMaxWidth())
+            SButton("我知道了", { termsOpen = false }, Modifier.fillMaxWidth().testTag("terms_close"))
         }
     }
 }
@@ -223,19 +223,19 @@ internal fun SummaryRows(values: FormValues) {
     val colors = ShadcnTheme.colors
     Column(Modifier.fillMaxWidth().background(colors.muted, RoundedCornerShape(8.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        SummaryRow("工作空间", values.name)
-        SummaryRow("工作邮箱", values.email)
-        SummaryRow("你的角色", Roles.firstOrNull { it.id == values.roleId }?.title.orEmpty())
-        SummaryRow("通知偏好", preferencesDescription(values))
+        SummaryRow("工作空间", values.name, "summary_name")
+        SummaryRow("工作邮箱", values.email, "summary_email")
+        SummaryRow("你的角色", Roles.firstOrNull { it.id == values.roleId }?.title.orEmpty(), "summary_role")
+        SummaryRow("通知偏好", preferencesDescription(values), "summary_preferences")
     }
 }
 
 @Composable
-private fun SummaryRow(label: String, value: String) {
+private fun SummaryRow(label: String, value: String, tag: String) {
     Column {
         Text(label, fontSize = 12.sp, color = ShadcnTheme.colors.mutedForeground)
         Spacer(Modifier.height(3.dp))
-        Text(value, fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, color = ShadcnTheme.colors.foreground)
+        Text(value, Modifier.testTag(tag), fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, color = ShadcnTheme.colors.foreground)
     }
 }
 
