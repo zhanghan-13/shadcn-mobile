@@ -445,7 +445,8 @@ class WorkspaceStateRestorationTest {
                 inputModeManager = LocalInputModeManager.current
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     STabs(listOf(TabOption("first", "第一项"), TabOption("disabled", "禁用", false),
-                        TabOption("last", "最后一项")), selected.value, { selected.value = it }, testTag = "rtl_tabs") { id ->
+                        TabOption("middle", "中间项"), TabOption("last", "最后一项")),
+                        selected.value, { selected.value = it }, testTag = "rtl_tabs") { id ->
                         val draft = rememberSaveable { mutableStateOf("") }
                         SInput(draft.value, { draft.value = it }, "面板草稿", testTag = "draft_$id")
                     }
@@ -458,9 +459,11 @@ class WorkspaceStateRestorationTest {
         compose.runOnIdle { inputModeManager.requestInputMode(InputMode.Keyboard) }
         compose.onNodeWithTag("rtl_tabs_first").performSemanticsAction(SemanticsActions.RequestFocus) { it() }
             .assertIsFocused().performKeyInput { pressKey(Key.DirectionLeft) }
-        compose.onNodeWithTag("rtl_tabs_last").assertIsSelected().assertIsFocused()
+        // Three enabled tabs distinguish RTL from LTR, even with wraparound navigation.
+        compose.onNodeWithTag("rtl_tabs_middle").assertIsSelected().assertIsFocused()
+        compose.onNodeWithTag("rtl_tabs_disabled").assertIsNotSelected()
         compose.onNodeWithTag("draft_first").assertDoesNotExist()
-        compose.onNodeWithTag("rtl_tabs_last").performKeyInput { pressKey(Key.DirectionRight) }
+        compose.onNodeWithTag("rtl_tabs_middle").performKeyInput { pressKey(Key.DirectionRight) }
         compose.onNodeWithTag("rtl_tabs_first").assertIsSelected().assertIsFocused()
         compose.onNodeWithTag("draft_first").assertTextEquals("保留在面板内")
         compose.onNodeWithTag("rtl_tabs_first").performKeyInput { pressKey(Key.MoveEnd) }
