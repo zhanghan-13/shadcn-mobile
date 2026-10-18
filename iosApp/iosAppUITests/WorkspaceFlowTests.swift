@@ -54,7 +54,7 @@ final class WorkspaceFlowTests: XCTestCase {
         enterDetails(name: "Validation workspace", email: "not-an-email")
         selectDeveloper()
         tap("terms_checkbox", scrolling: .up)
-        expectValue("terms_checkbox", "1")
+        expectSelected("terms_checkbox", true)
         tap("submit_button", scrolling: .up)
         expectLabel("email_error", "请输入有效的邮箱地址")
         expectAbsent("review_confirm")
@@ -72,16 +72,16 @@ final class WorkspaceFlowTests: XCTestCase {
         selectDeveloper()
 
         tap("preferences_button", scrolling: .up)
-        expectValue("email_updates", "1")
-        expectValue("product_news", "0")
+        expectSelected("email_updates", true)
+        expectSelected("product_news", false)
         tap("product_news")
-        expectValue("product_news", "1")
+        expectSelected("product_news", true)
         capture("03-preferences-saved")
         tap("save_preferences")
         expectAbsent("save_preferences")
         expect(element("preferences_button"), "label CONTAINS %@", "工作空间更新与产品动态")
         tap("terms_checkbox", scrolling: .up)
-        expectValue("terms_checkbox", "1")
+        expectSelected("terms_checkbox", true)
 
         tap("submit_button", scrolling: .up)
         expectSummary(name: "设计工作室", preferences: "工作空间更新与产品动态")
@@ -92,9 +92,9 @@ final class WorkspaceFlowTests: XCTestCase {
         expectValue("workspace_name", "设计工作室")
         expectValue("email", "hello@example.com")
         reveal("terms_checkbox", direction: .up)
-        expectValue("terms_checkbox", "1")
+        expectSelected("terms_checkbox", true)
         tap("preferences_button", scrolling: .down)
-        expectValue("product_news", "1")
+        expectSelected("product_news", true)
         tap("save_preferences")
 
         tap("submit_button", scrolling: .up)
@@ -108,10 +108,10 @@ final class WorkspaceFlowTests: XCTestCase {
         expectValue("workspace_name", "")
         expectValue("email", "")
         reveal("terms_checkbox", direction: .up)
-        expectValue("terms_checkbox", "0")
+        expectSelected("terms_checkbox", false)
         tap("preferences_button", scrolling: .down)
-        expectValue("email_updates", "1")
-        expectValue("product_news", "0")
+        expectSelected("email_updates", true)
+        expectSelected("product_news", false)
     }
 
     @MainActor
@@ -137,17 +137,17 @@ final class WorkspaceFlowTests: XCTestCase {
     @MainActor
     func testPreferencesCancelAndSwipeDiscardUnsavedChanges() {
         tap("preferences_button", scrolling: .up)
-        expectValue("product_news", "0")
+        expectSelected("product_news", false)
         tap("product_news")
-        expectValue("product_news", "1")
+        expectSelected("product_news", true)
         tap("cancel_preferences")
         expectAbsent("save_preferences")
         expect(element("preferences_button"), "label CONTAINS %@", "仅接收工作空间更新")
 
         tap("preferences_button")
-        expectValue("product_news", "0")
+        expectSelected("product_news", false)
         tap("product_news")
-        expectValue("product_news", "1")
+        expectSelected("product_news", true)
         let handle = element("preferences_drag_handle")
         let title = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", "只接收你关心的内容")).element
@@ -157,8 +157,8 @@ final class WorkspaceFlowTests: XCTestCase {
             .press(forDuration: 0.15, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.96)))
         expectAbsent("save_preferences")
         tap("preferences_button")
-        expectValue("product_news", "0")
-        expectValue("email_updates", "1")
+        expectSelected("product_news", false)
+        expectSelected("email_updates", true)
         capture("preferences-discarded")
     }
 
@@ -182,7 +182,7 @@ final class WorkspaceFlowTests: XCTestCase {
         enterDetails(name: "Theme workspace", email: "hello@example.com")
         selectDeveloper()
         tap("terms_checkbox", scrolling: .up)
-        expectValue("terms_checkbox", "1")
+        expectSelected("terms_checkbox", true)
         let previousThemeLabel = element("theme_toggle").label
         tap("theme_toggle")
         expect(element("theme_toggle"), "label != %@", previousThemeLabel)
@@ -193,7 +193,7 @@ final class WorkspaceFlowTests: XCTestCase {
         reveal("role_trigger", direction: .up)
         expectValue("role_trigger", "已收起")
         reveal("terms_checkbox", direction: .up)
-        expectValue("terms_checkbox", "1")
+        expectSelected("terms_checkbox", true)
         tap("submit_button", scrolling: .up)
         expectSummary(name: "Theme workspace", preferences: "仅接收工作空间更新")
     }
@@ -210,7 +210,7 @@ final class WorkspaceFlowTests: XCTestCase {
         expectValue("workspace_name", "Terms workspace")
         expectValue("email", "terms@example.com")
         reveal("terms_checkbox", direction: .up)
-        expectValue("terms_checkbox", "0")
+        expectSelected("terms_checkbox", false)
     }
 
     private enum ScrollDirection { case up, down }
@@ -246,6 +246,7 @@ final class WorkspaceFlowTests: XCTestCase {
     @MainActor private func type(_ tag: String, _ text: String) {
         tap(tag)
         XCTAssertTrue(app.keyboards.element.waitForExistence(timeout: 5))
+        dismissKeyboardIntroductionIfPresent()
         element(tag).typeText(text)
         expectValue(tag, text)
     }
@@ -274,6 +275,8 @@ final class WorkspaceFlowTests: XCTestCase {
         // keyboard being installed on the CI simulator. It does not prefill app state.
         UIPasteboard.general.string = "设计工作室"
         tap("workspace_name")
+        XCTAssertTrue(app.keyboards.element.waitForExistence(timeout: 5))
+        dismissKeyboardIntroductionIfPresent()
         element("workspace_name").press(forDuration: 1.0)
         let pastePredicate = NSPredicate(format: "label IN %@", ["Paste", "粘贴"])
         let menuItem = app.menuItems.matching(pastePredicate).element
@@ -291,14 +294,31 @@ final class WorkspaceFlowTests: XCTestCase {
             XCTAssertTrue(allowPaste.exists)
             allowPaste.tap()
         }
+        dismissKeyboardIntroductionIfPresent()
         expectValue("workspace_name", "设计工作室")
         pressKeyboardButton(["Next", "next", "下一项", "下一个"])
     }
 
     @MainActor private func pressKeyboardButton(_ labels: [String]) {
+        dismissKeyboardIntroductionIfPresent()
         let key = app.keyboards.buttons.matching(NSPredicate(format: "label IN %@", labels)).element
         XCTAssertTrue(key.waitForExistence(timeout: 5), "Missing keyboard key: \(labels)")
         key.tap()
+    }
+
+    @MainActor private func dismissKeyboardIntroductionIfPresent() {
+        // Observed on the fresh CI simulator. Scope to this native keyboard view,
+        // and verify its explanatory copy before accepting its Continue action.
+        let introduction = app.otherElements["UIContinuousPathIntroductionView"]
+        guard introduction.waitForExistence(timeout: 1) else { return }
+        let explanation = introduction.staticTexts[
+            "Speed up your typing by sliding your finger across the letters to compose a word."
+        ]
+        XCTAssertTrue(explanation.waitForExistence(timeout: 3))
+        let continueButton = introduction.buttons["Continue"]
+        expect(continueButton, "exists == true AND hittable == true")
+        continueButton.tap()
+        expect(introduction, "exists == false")
     }
 
     @MainActor private func expectKeyboardHidden() {
@@ -321,6 +341,13 @@ final class WorkspaceFlowTests: XCTestCase {
         }
     }
 
+    @MainActor private func expectSelected(_ tag: String, _ selected: Bool) {
+        XCTAssertTrue(element(tag).waitForExistence(timeout: 5), "Missing \(tag)")
+        // Compose iOS exports ToggleableState as UIAccessibilityTraitSelected.
+        // The actual checkbox accessibility elements are buttons with no value.
+        expect(element(tag), selected ? "selected == true" : "selected == false")
+    }
+
     @MainActor private func expectLabel(_ tag: String, _ value: String) {
         XCTAssertTrue(element(tag).waitForExistence(timeout: 5), "Missing \(tag)")
         expect(element(tag), "label == %@", value)
@@ -333,8 +360,19 @@ final class WorkspaceFlowTests: XCTestCase {
     @MainActor private func expect(_ target: XCUIElement, _ format: String, _ arguments: CVarArg...) {
         let predicate = NSPredicate(format: format, arguments: getVaList(arguments))
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: target)
-        XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 8), .completed,
-                       "Expected \(format) for \(target)")
+        let result = XCTWaiter.wait(for: [expectation], timeout: 8)
+        if result != .completed {
+            print("UI assertion expected: \(predicate.predicateFormat)")
+            if target.exists {
+                print("UI assertion actual: \(target.debugDescription)")
+                print("UI assertion state: selected=\(target.isSelected), hittable=\(target.isHittable), value=\(String(describing: target.value))")
+            } else {
+                print("UI assertion actual: element does not exist")
+            }
+            print("UI assertion accessibility tree:\n\(app.debugDescription)")
+        }
+        XCTAssertEqual(result, .completed,
+                       "Expected \(predicate.predicateFormat) for \(target)")
     }
 
     @MainActor private func capture(_ name: String) {

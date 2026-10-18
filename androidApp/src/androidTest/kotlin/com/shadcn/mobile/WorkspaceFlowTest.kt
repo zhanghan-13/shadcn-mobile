@@ -27,6 +27,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso.closeSoftKeyboard
@@ -129,8 +131,8 @@ class WorkspaceFlowTest {
 
         compose.onNodeWithTag("role_search").performTextReplacement("Developer")
         compose.onNodeWithTag("role_empty").assertDoesNotExist()
-        closeSoftKeyboard()
-        compose.onNodeWithTag("role_option_developer").performClick()
+        // Keep the search keyboard open and send a real touch to catch IME occlusion.
+        compose.onNodeWithTag("role_option_developer").assertIsDisplayed().performTouchInput { click() }
         compose.onNodeWithTag("role_search").assertDoesNotExist()
 
         // Other fields are empty; a valid role must no longer produce its error.

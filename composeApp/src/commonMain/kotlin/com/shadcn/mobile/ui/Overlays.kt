@@ -57,14 +57,19 @@ fun SCombobox(selectedId: String, onSelect: (String) -> Unit, error: String? = n
                     color = if (selected == null) colors.mutedForeground else colors.foreground)
                 SIcon("chevron-down", size = 17.dp)
             }
-            DropdownMenu(
-                expanded = expanded, onDismissRequest = ::dismiss,
-                modifier = Modifier.widthIn(min = 280.dp, max = 340.dp).heightIn(max = 390.dp).testTag("role_menu"),
-                shape = RoundedCornerShape(10.dp), containerColor = colors.surface,
-                tonalElevation = 0.dp, shadowElevation = 8.dp,
-                border = androidx.compose.foundation.BorderStroke(1.dp, colors.border),
+            if (expanded) Dialog(
+                onDismissRequest = ::dismiss,
+                properties = DialogProperties(usePlatformDefaultWidth = false),
             ) {
-                Column(Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+                // Dialog measures within the keyboard's available area on iOS. A regular
+                // DropdownMenu only avoids system bars, leaving search results behind the IME.
+                Column(
+                    Modifier.padding(horizontal = 24.dp).widthIn(max = 340.dp).fillMaxWidth()
+                        .heightIn(max = 390.dp).testTag("role_menu").semantics { paneTitle = "选择角色" }
+                        .background(colors.surface, RoundedCornerShape(10.dp))
+                        .border(1.dp, colors.border, RoundedCornerShape(10.dp))
+                        .verticalScroll(rememberScrollState()).padding(12.dp),
+                ) {
                     SInput(query, { query = it }, label = "搜索角色", placeholder = "搜索中文或英文…", testTag = "role_search")
                     Spacer(Modifier.height(8.dp))
                     val options = filterRoles(query)
