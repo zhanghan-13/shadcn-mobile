@@ -1,6 +1,6 @@
 # Documentation and browser verification
 
-The original form and documentation checks were recorded on **2026-10-17**, with Switch, Textarea, RadioGroup and Alert added on **2026-10-18**, using Chrome on Windows. Local checks used `http://127.0.0.1:4173/shadcn-mobile/`. The original complete form flow was also checked separately on [GitHub Pages](https://zhanghan-13.github.io/shadcn-mobile/); the new component checks below are local results.
+The original form and documentation checks were recorded on **2026-10-17**, with Switch, Textarea, RadioGroup and Alert added on **2026-10-18**, using Chrome on Windows. Local checks used `http://127.0.0.1:4173/shadcn-mobile/`. The local results are listed first; the separate [GitHub Pages](https://zhanghan-13.github.io/shadcn-mobile/) checks at main `4677984` are recorded under Published site.
 
 ## Built artifact
 
@@ -43,13 +43,25 @@ The existing disabled Button/Checkbox examples have empty callbacks, so their un
 
 ## Published site
 
-[Docs and Pages run 39045335653](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045335653) passed and deployed the documentation to [GitHub Pages](https://zhanghan-13.github.io/shadcn-mobile/).
+On **2026-10-18**, [Docs and Pages run 39119042228](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39119042228) passed at main commit `46779842fc43820abc9b2a177f638283a1408e7c`. The workflow built Wasm, verified 13 routes / 10 exact Kotlin APIs / 2 related types, uploaded the artifact and deployed it to **https://zhanghan-13.github.io/shadcn-mobile/**. The deployment job completed at 10:27:14 UTC. The following checks used that public URL in Chrome on Windows, through the rendered UI.
 
-On the deployed site in Chrome, the complete form flow passed: entered the form values, selected a role, saved notification preferences in the Sheet, checked the consent box, reviewed and confirmed the Dialog, and reached the success summary. This was a manual check of the rendered UI; no backend submission occurs. The success-screen capture is retained locally at `.local/published-form-success.png`.
+| Public check | Observed result |
+| --- | --- |
+| Switch | The enabled control changed state and count. Pointer and accessibility activation of the disabled control preserved its state and did not increase the count. |
+| Textarea | Entered `公开站验证：第一行`, pressed Enter and entered `第二行：中文多行`; both lines remained visible. Clicking the read-only field and typing did not alter its content. Empty validation also displayed the expected error during the later navigation check. |
+| RadioGroup | Selected professional, verified that only that option was selected, then returned to free with a count of 2. Pointer and accessibility activation of the disabled enterprise option did not change the selection or count. |
+| Alert | Retry changed the destructive message to “已重新连接” and the action to “连接已恢复”. This is local demo state, not a network recovery test. |
+| Directory and search | The sidebar exposed all ten components. Searching `RadioOption` returned RadioGroup and Enter opened it. Six subsequent real directory clicks followed Switch → Textarea → RadioGroup → Alert → Switch → Textarea; each preview loaded and responded to an action without Reset. |
+| Homepage status | The page displayed 15 Android interaction tests plus 10 shared tests and 13 iOS native tests. The links pointed to runs `39116229205` and `39116804249` respectively. The iOS physical-device, manual VoiceOver and larger-type limitations remained visible. |
+| Complete form | Entered `公开站回归工作室` and `hello@example.com`, selected developer, saved both notification options, accepted the demo checkbox, reviewed the same values and confirmed. The success summary showed the name, email, role and both notification settings. No backend submission occurs. |
 
-This deployed check covers the complete form flow. The individual documentation controls and component examples in the table above retain their original local verification scope.
+Two early navigations showed a white preview without the loading overlay while the accessibility tree reported `about:blank`: Textarea → RadioGroup used a hash URL navigation; RadioGroup → Alert used a real sidebar click. Reset recovered both. The frame was visible and its `src` was correct; no `loading` attribute was present. Later Alert reload, search navigation and the six real directory clicks above loaded normally without Reset. The supported Chrome inspection API did not expose the child document's URL/readiness, so the cause was not established and no loading fix is claimed. A later normal observation reported the top-level document as visible. Brief `about:blank` observations also preceded successful loads, so that accessibility value alone was not treated as a failure.
 
-The feature-branch [Docs run 39115959199](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39115959199) passed at `f072a20`: Wasm built, all 13-route/10-API/2-type checks passed, and the Pages artifact was uploaded. Deployment was skipped; this document does not claim that the four added pages have been verified on the public site.
+A separate check in the Codex in-app browser opened Switch directly, then used directory links to visit RadioGroup → Alert → Textarea. All four previews loaded without Reset. The Switch count changed to 1, RadioGroup selected professional with a count of 1, Alert changed to its recovered state, and Textarea retained Chinese text across a real Enter keypress. The final multiline screenshot is retained at `.local/published-4677984/iab-textarea.png`. This cross-check did not reproduce the earlier Chrome blanks or establish their cause.
+
+Public screenshots are retained locally under `.local/published-4677984/`: `switch.png`, `textarea.png`, `radio.png`, `alert.png`, `status.png` and `form-success.png`. The deployment JSON and log are retained under `.local/pages-run-39119042228.*`. This was a desktop-site check with the phone-width preview frame, not another full mobile-viewport, dark-theme or assistive-technology audit. The other documentation controls in the earlier tables retain their recorded local scope.
+
+For history, [Docs run 39045335653](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045335653) deployed the original site and its complete form passed a public Chrome check (`.local/published-form-success.png`). Feature-branch [Docs run 39115959199](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39115959199) later passed at `f072a20`, including the expanded artifact checks; deployment was skipped on that branch.
 
 ## Screenshots
 
@@ -66,4 +78,4 @@ The captures are visual inspection evidence, not pixel comparison assertions. A 
 - The browser preview demonstrates the shared appearance and component flow. It does not prove native IME, system gestures, safe areas or VoiceOver behavior. See [native verification](verification.md).
 - The app Wasm, Skiko runtime, JavaScript and bundled CJK font total roughly 20 MiB before transfer compression. Webpack reports large-asset warnings; first-load cost remains a prototype limitation.
 - The dependency runtime logs a nonfatal deprecation warning about accessing Wasm memory via `wasmExports`. The tested interactions completed; this is not a clean-console claim.
-- The recorded public-site check covers the original form. The expanded iOS suite separately passed all 13 native UI tests; browser results do not replace those native results. See [delivery status](delivery.md) and [CI validation](ci-validation.md).
+- The public-site check covers the four added previews, representative navigation/search, status links and a complete form flow, with the loading observations recorded above. The expanded iOS suite separately passed all 13 native UI tests; browser results do not replace those native results. See [delivery status](delivery.md) and [CI validation](ci-validation.md).

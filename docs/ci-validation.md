@@ -1,11 +1,13 @@
 # CI configuration and validation
 
-Updated on **2026-10-18**. Local checks and hosted results are recorded separately below. Docs validation targets `f072a20`, Android targets `743c97c` after its screenshot-helper adjustment, and iOS targets `5558058` after its keyboard-wait adjustment. Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for subsequent runs.
+Updated on **2026-10-18**. Local checks and hosted results are recorded separately below. The latest verified Docs deployment and Android run target main `4677984`; the verified 13-test iOS result targets `5558058` after its keyboard-wait adjustment. Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for subsequent runs.
 
 ## Hosted results
 
 | Workflow | Run | Verified result |
 | --- | --- | --- |
+| Docs and Pages, main | [39119042228](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39119042228) | Passed at `46779842fc43820abc9b2a177f638283a1408e7c`: Wasm built, 13-route/10-API/2-related-type checks passed, artifact uploaded and deployed to [GitHub Pages](https://zhanghan-13.github.io/shadcn-mobile/) at 10:27 UTC. The four added previews and a complete form flow were then exercised on the public site; see [browser results and loading observations](web-verification.md#published-site). |
+| Android, main | [39119042251](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39119042251) | Passed at `4677984`: 10 host tests and 15 distinct instrumentation tests, no failures/skips, ten required screenshots collected and artifact uploaded. Instrumentation took 113.239 seconds; the job ran 10:23:15–10:29:41 UTC. |
 | Android, expanded suite | [39116229205](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39116229205) | Passed at `743c97c`: 10 host tests and 15 distinct instrumentation tests, 0 failures/skips, ten nonempty screenshots. Instrumentation took 93.053 seconds; APKs, reports and screenshots were uploaded. |
 | Docs, ten components | [39115959199](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39115959199) | Passed at `f072a20`: Wasm built, 13-route/10-API/2-related-type checks passed, Pages artifact uploaded. Deployment was skipped on this feature branch. |
 | iOS, expanded suite | [39116804249](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39116804249) | Passed at `5558058`: both frameworks linked, Swift host built, 13 distinct native UI tests passed with 0 failures/skips/expected failures and no retries. Test execution took 817.756 seconds; reports and attachments were uploaded. |
