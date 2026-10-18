@@ -1,26 +1,28 @@
 # CI configuration and validation
 
-Configuration checks were recorded on **2026-10-17**; the native iOS interaction result was added on **2026-10-18**. Hosted workflow results are listed separately from the original local configuration checks below. Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for subsequent runs.
+Updated on **2026-10-18**. Local checks and hosted results are recorded separately below. Docs validation targets `f072a20`, Android targets `743c97c` after its screenshot-helper adjustment, and iOS targets `5558058` after its keyboard-wait adjustment. Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for subsequent runs.
 
 ## Hosted results
 
 | Workflow | Run | Verified result |
 | --- | --- | --- |
+| Android, expanded suite | [39116229205](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39116229205) | Passed at `743c97c`: 10 host tests and 15 distinct instrumentation tests, 0 failures/skips, ten nonempty screenshots. Instrumentation took 93.053 seconds; APKs, reports and screenshots were uploaded. |
+| Docs, ten components | [39115959199](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39115959199) | Passed at `f072a20`: Wasm built, 13-route/10-API/2-related-type checks passed, Pages artifact uploaded. Deployment was skipped on this feature branch. |
+| iOS, expanded suite | [39116804249](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39116804249) | Passed at `5558058`: both frameworks linked, Swift host built, 13 distinct native UI tests passed with 0 failures/skips/expected failures and no retries. Test execution took 817.756 seconds; reports and attachments were uploaded. |
 | Android | [39045766118](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045766118) | Passed: 10 shared host tests, 8 instrumentation tests and six screenshots. |
 | Docs and Pages | [39045335653](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39045335653) | Passed and deployed the [published documentation](https://zhanghan-13.github.io/shadcn-mobile/). The complete form also passed a manual Chrome check on the deployed site; see [browser verification](web-verification.md). |
-| iOS | [39112862050](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050) | Passed at `ac4ca80`: both Apple frameworks linked, Swift host built, all 8 native UI tests passed with 0 failures, 0 skips and no retries. Reports and screenshot attachments were uploaded. |
 
 ## Workflows
 
 | Workflow | Execution | Evidence retained |
 | --- | --- | --- |
-| [Android](../.github/workflows/android.yml) | One `ubuntu-latest` runner builds the app/test APKs, runs the shared host tests, then runs the Android instrumentation suite on a single API 35 x86_64 Google APIs emulator. | APKs, host JUnit XML/HTML, instrumentation output, logcat, and six screenshots. |
-| [iOS](../.github/workflows/ios.yml) | One standard Apple silicon `macos-26` runner with Xcode 26.4.1 links both Apple frameworks and executes `iosAppUITests` serially on one available iPhone simulator. | Framework/build/test logs, `.xcresult`, exported test reports and attachments, simulator inventory, failure accessibility trees, screenshots and a simulator app ZIP. |
+| [Android](../.github/workflows/android.yml) | One `ubuntu-latest` runner builds the app/test APKs, runs 10 shared host tests, then runs 15 instrumentation tests on a single API 35 x86_64 Google APIs emulator. | APKs, host JUnit XML/HTML, instrumentation output, logcat, and ten required screenshots. |
+| [iOS](../.github/workflows/ios.yml) | One standard Apple silicon `macos-26` runner with Xcode 26.4.1 links both Apple frameworks and executes 13 `iosAppUITests` serially on one dedicated iPhone simulator. | Framework/build/test logs, `.xcresult`, exported test reports and attachments, simulator inventory, failure accessibility trees, screenshots and a simulator app ZIP. |
 | [Docs and Pages](../.github/workflows/docs.yml) | Builds the shared Compose Wasm distribution and the static documentation, validates the output, and uploads a Pages artifact. A separate job deploys only on `main` push/manual runs. | A Pages artifact containing `website/dist`, including the shared demo under `demo/`. |
 
-The recorded iOS run used macOS 26.6.2, Xcode 26.4.1 (17E202) and Swift 6.3.1, with one iPhone 17 Pro simulator running iOS 26.5 (23F77). Its `.xcresult` summary reports 8 passed, 0 failed, 0 skipped and 0 expected failures. The report checker verified eight distinct passing methods, and the log records one execution of each method with no runner restarts. The native suite took 486.230 seconds.
+The completed iOS run `39116804249` used macOS 26.6.2, Xcode 26.4.1 (17E202) and Swift 6.3.1, with one iPhone 17 Pro simulator running iOS 26.5 (23F77). Its `.xcresult` summary reports 13 passed, 0 failed, 0 skipped and 0 expected failures. The report checker verified 13 distinct passing methods, and the log records one execution of each method with no retries or runner restarts. The native suite took 817.756 seconds. Earlier iOS runs and the keyboard-wait diagnosis are retained in [native verification history](verification.md#earlier-ios-runs).
 
-The UI suite covers required fields, invalid email, a complete Chinese workspace flow with review cancellation and reset, role-search recovery, discarded Sheet edits after cancel/swipe, keyboard Next/Done, theme changes and the terms dialog. It uses system keyboard input, a native Paste action for Chinese text, taps and swipes. Tests do not inject form state. Failed runs retain a screenshot and accessibility tree; successful steps retain screenshots for visual inspection.
+The UI suite covers required fields, invalid email, a complete Chinese workspace flow with review cancellation and reset, role-search recovery, discarded Sheet edits after cancel/swipe, keyboard Next/Done, theme changes, the terms dialog, Switch, Textarea, RadioGroup, Alert and gallery navigation. It uses system keyboard input, a native Paste action for Chinese text, taps and swipes. Tests do not inject form state. Failed runs retain a screenshot and accessibility tree; successful steps retain screenshots for visual inspection.
 
 This simulator result does not establish physical-device/signing coverage, manual VoiceOver validation or larger Dynamic Type coverage.
 
@@ -31,10 +33,12 @@ Changes relevant to each platform trigger that platform's workflow. Pull request
 - **actionlint 1.7.12:** all three workflow files passed with no diagnostics. The official Windows release ZIP was checked against its published SHA-256 manifest before use.
 - **Bash parsing:** `bash -n scripts/ci-android.sh` and `bash -n scripts/ci-ios.sh` passed.
 - **Host-test report check:** `ci-check-tests.py` read the existing local JUnit report and verified **10 passing tests**. This did not rerun those tests.
-- **Instrumentation report check:** the checker read the existing local emulator run and verified **8 passing tests**. This did not rerun the emulator suite.
+- **Instrumentation report check:** the local run at `f072a20` recorded **15 passing tests** in 41.61 seconds; the CI checker now requires at least 15. The separate dark-mode/150%-font run passed the four new component tests in 8.576 seconds. After the Android screenshot adjustment at `743c97c`, the complete-form test passed locally in 9.82 seconds; the hosted full-suite result is recorded separately above.
 - **Failure-path checks:** the checker rejected an empty JUnit suite, failed JUnit results, failed instrumentation output, and incomplete instrumentation output.
 
-The report checker requires at least 10 host tests and 8 instrumentation tests, with no failed/skipped host tests. Android screenshots must also exist before the CI script succeeds. Instrumentation runs through `adb shell am instrument` so the app's screenshot files can be collected before the temporary emulator is removed. Runner output is checked explicitly because `adb` exiting successfully alone does not prove that the tests passed.
+The Android report checker requires at least 10 host tests and 15 instrumentation tests, with no failed/skipped host tests. All ten expected screenshots must exist before the CI script succeeds. Instrumentation runs through `adb shell am instrument` so the app's screenshot files can be collected before the temporary emulator is removed. Runner output is checked explicitly because `adb` exiting successfully alone does not prove that the tests passed.
+
+The iOS checker requires at least 13 distinct methods from `iosAppUITests`, with zero failures, skips or expected failures, and rejects retries or duplicate executions. Xcode runs the suite once, serially, with a 180-second default and 300-second maximum per-test allowance. The script selects a shutdown iPhone and shuts it down afterward only if this invocation successfully booted it; already-running simulators are left alone. Exported `xcresulttool` JSON and command help are retained with the artifact.
 
 The static website has its own validation command, `node website/verify.mjs --dist`, which is wired into the Docs workflow after the build. Website and browser verification results are recorded separately from these CI configuration checks.
 
@@ -45,7 +49,7 @@ actionlint .github/workflows/android.yml .github/workflows/ios.yml .github/workf
 bash -n scripts/ci-android.sh
 bash -n scripts/ci-ios.sh
 python3 scripts/ci-check-tests.py junit composeApp/build/test-results/testAndroidHostTest 10
-python3 scripts/ci-check-tests.py instrumentation docs/instrumentation-run.txt 8
+python3 scripts/ci-check-tests.py instrumentation docs/instrumentation-run.txt 15
 ```
 
 The report-check commands require reports from a prior successful local test run. To execute the actual jobs locally on supported hosts:

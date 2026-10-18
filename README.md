@@ -59,15 +59,17 @@ For a non-default ADB server, pass `-AdbPort`; the current workstation's isolate
 
 APK: `androidApp/build/outputs/apk/debug/androidApp-debug.apk`.
 
+On **2026-10-18**, [Android run 39116229205](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39116229205) at `743c97c` passed **10 shared host tests and all 15 instrumentation tests**, with no failures or skips. Instrumentation took 93.053 seconds and ten screenshots were retained. Coverage includes the four added components, gallery navigation, Activity recreation, and disabled/loading callback guards under accessibility activation. The earlier local 15-test run at `f072a20` passed in 41.61 seconds. The four new component tests also passed locally in dark mode at 150% system font scale; reviewed screenshots showed no clipping.
+
 ## iOS
 
 Requires **macOS, Xcode and a compatible JDK**. Open `iosApp/iosApp.xcodeproj`, choose the shared `iosApp` scheme, then an iPhone simulator. The Xcode build phase invokes the Gradle wrapper to build/embed the `ShadcnMobile` framework. If necessary run `chmod +x gradlew` once after cloning on macOS. Select your own signing team only when running on a physical device.
 
 Targets: `iosArm64` and `iosSimulatorArm64` (Apple silicon simulator), with iOS 16+ in the Xcode host. The same `App()` composable and form logic are shared.
 
-Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. On **2026-10-18**, [iOS run 39112862050](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39112862050) linked both Apple frameworks, built the Swift host and passed all **8 native UI tests**, with no failures, skips or retries. The run used an iPhone 17 Pro simulator on iOS 26.5, hosted macOS 26.6.2, Xcode 26.4.1 and Swift 6.3.1.
+Shared Kotlin sources compile successfully to KLIB for both targets on this Windows workstation. On **2026-10-18**, [iOS run 39116804249](https://github.com/zhanghan-13/shadcn-mobile/actions/runs/39116804249) at `5558058` linked both Apple frameworks, built the Swift host and passed all **13 native UI tests**, with no failures, skips, expected failures or retries. The run used an iPhone 17 Pro simulator on iOS 26.5, hosted macOS 26.6.2, Xcode 26.4.1 and Swift 6.3.1. Test execution took 817.756 seconds.
 
-The recorded eight-test suite covers validation, Chinese input through native Paste, role search, saved and discarded Sheet edits, keyboard Next/Done, review cancellation, submission/reset, theme changes and terms-dialog dismissal. That result covers the original form, not the added Switch, Textarea, RadioGroup or Alert. Run the current suite with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. **Physical-device testing, manual VoiceOver checks and larger Dynamic Type remain unverified.**
+The suite covers validation, Chinese input through native Paste, role search, saved and discarded Sheet edits, keyboard Next/Done, review cancellation, submission/reset, themes and terms-dialog dismissal. It also covers Switch, Chinese multiline Textarea, RadioGroup, Alert and gallery navigation, including disabled/read-only behavior and draft preservation. Run it with Xcode's Test action or `bash scripts/ci-ios.sh` on an Apple silicon Mac. **Physical-device testing, manual VoiceOver checks and larger Dynamic Type remain unverified.**
 
 ## Tests and evidence
 
@@ -93,8 +95,8 @@ The preview requires a browser with WebAssembly GC support. Native keyboard, ges
 
 Three workflows are prepared:
 
-- **Android:** build app/test APKs, verify shared tests actually ran, execute the API 35 emulator interaction suite, and upload APKs/reports/screenshots.
-- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute the native UI suite serially in an iPhone simulator, and collect reports, screenshots and failure evidence. The recorded hosted run passed the original eight form tests; the added component tests await a hosted result.
+- **Android:** build app/test APKs, verify 10 shared tests and 15 API 35 emulator tests actually ran, and upload APKs/reports/screenshots.
+- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute 13 native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence.
 - **Docs and Pages:** build the shared Wasm preview and static documentation; pull requests build only, while `main` can deploy the validated artifact to Pages.
 
 Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [zhanghan-13.github.io/shadcn-mobile](https://zhanghan-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.
