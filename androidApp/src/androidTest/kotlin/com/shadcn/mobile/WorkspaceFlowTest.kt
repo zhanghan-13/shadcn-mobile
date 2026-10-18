@@ -189,7 +189,7 @@ class WorkspaceFlowTest {
         compose.enterWorkspaceDetails()
         compose.onNodeWithTag("role_trigger").performScrollTo().performClick()
         compose.onNodeWithTag("role_search").assertExists()
-        closeSoftKeyboard()
+        // Opening the role dialog already clears focus and hides the keyboard.
         compose.pressSystemBack()
         compose.onNodeWithTag("role_search").assertDoesNotExist()
 
