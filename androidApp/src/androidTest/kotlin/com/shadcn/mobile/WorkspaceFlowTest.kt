@@ -34,10 +34,23 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Modifier
@@ -273,6 +286,107 @@ class WorkspaceFlowTest {
     }
 
     @Test
+    fun tabsKeepDraftAcrossPanelsAndIgnoreDisabledSelection() {
+        openComponent("tabs")
+        compose.onNodeWithTag("gallery_tabs_profile").assertIsSelected()
+            .assertHeightIsAtLeast(48.dp)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab))
+        compose.onNodeWithTag("tabs_draft").performTextInput("设计师的草稿")
+        compose.onNodeWithTag("tabs_draft").performImeAction()
+        compose.onNodeWithTag("gallery_tabs_activity").performTouchInput { click() }.assertIsSelected()
+        compose.onNodeWithTag("gallery_tabs_profile").assertIsNotSelected()
+        compose.onNodeWithTag("tabs_draft").assertDoesNotExist()
+        compose.onNodeWithTag("tabs_activity").assertTextEquals("最近活动：已创建工作空间")
+        compose.onNodeWithTag("gallery_tabs_disabled").performScrollTo().assertIsNotEnabled()
+            .performTouchInput { click() }
+            .performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.onNodeWithTag("tabs_count").assertTextEquals("已切换 1 次")
+        compose.onNodeWithTag("gallery_tabs_profile").performScrollTo().performTouchInput { click() }.assertIsSelected()
+        compose.onNodeWithTag("tabs_draft").assertTextEquals("设计师的草稿")
+        compose.onNodeWithTag("tabs_activity").assertDoesNotExist()
+        compose.onNodeWithTag("tabs_count").assertTextEquals("已切换 2 次")
+        compose.captureEvidence("11-tabs")
+    }
+
+    @Test
+    fun accordionExposesOnlyOpenContentAndIgnoresDisabledActivation() {
+        openComponent("accordion")
+        compose.onNodeWithTag("gallery_accordion_native_content").assertDoesNotExist()
+        compose.onNodeWithTag("gallery_accordion_native").assertHeightIsAtLeast(48.dp)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "已折叠"))
+            .performTouchInput { click() }
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "已展开"))
+        compose.onNodeWithTag("gallery_accordion_native_content").assertIsDisplayed()
+        compose.onNodeWithTag("gallery_accordion_ownership").performTouchInput { click() }
+        compose.onNodeWithTag("gallery_accordion_native_content").assertDoesNotExist()
+        compose.onNodeWithTag("gallery_accordion_ownership_content").assertIsDisplayed()
+        compose.onNodeWithTag("gallery_accordion_disabled").assertIsNotEnabled()
+            .performTouchInput { click() }
+            .performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.onNodeWithTag("accordion_count").assertTextEquals("已切换 2 次")
+        compose.captureEvidence("12-accordion")
+        compose.onNodeWithTag("gallery_accordion_ownership").performTouchInput { click() }
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "已折叠"))
+        compose.onNodeWithTag("gallery_accordion_ownership_content").assertDoesNotExist()
+        compose.onNodeWithTag("accordion_count").assertTextEquals("已切换 3 次")
+    }
+
+    @Test
+    fun sliderDragAndAccessibilityAdjustValueWhileDisabledSliderStaysFixed() {
+        openComponent("slider")
+        val slider = compose.onNodeWithTag("gallery_slider").assertHeightIsAtLeast(48.dp)
+        slider.assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+            ProgressBarRangeInfo(40f, 0f..100f, 9)))
+        slider.performTouchInput { swipe(Offset(width * 0.4f, height / 2f), Offset(width * 0.85f, height / 2f), 450) }
+        slider.assert(SemanticsMatcher("drag increases and snaps to a ten-point step") {
+            val value = it.config[SemanticsProperties.ProgressBarRangeInfo].current
+            value >= 70f && value <= 100f && value.toInt() % 10 == 0
+        })
+        compose.onNodeWithTag("gallery_slider_finished").assertTextEquals("已完成 1 次调整")
+        slider.performSemanticsAction(SemanticsActions.SetProgress) { it(20f) }
+        compose.onNodeWithTag("gallery_slider_value").assertTextEquals("音量：20")
+        val changesBefore = compose.onNodeWithTag("gallery_slider_count").fetchSemanticsNode().config[SemanticsProperties.Text]
+        val finishesBefore = compose.onNodeWithTag("gallery_slider_finished").fetchSemanticsNode().config[SemanticsProperties.Text]
+        val disabledBefore = compose.onNodeWithTag("gallery_slider_disabled").fetchSemanticsNode()
+            .config[SemanticsProperties.ProgressBarRangeInfo]
+        org.junit.Assert.assertEquals(60f, disabledBefore.current, 0.001f)
+        compose.onNodeWithTag("gallery_slider_disabled").assertIsNotEnabled()
+            .performTouchInput { swipe(Offset(width * 0.6f, height / 2f), Offset(width * 0.9f, height / 2f), 350) }
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(90f) }
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+                disabledBefore))
+        compose.onNodeWithTag("gallery_slider_count").assert(SemanticsMatcher.expectValue(SemanticsProperties.Text, changesBefore))
+        compose.onNodeWithTag("gallery_slider_finished").assert(SemanticsMatcher.expectValue(SemanticsProperties.Text, finishesBefore))
+        compose.captureEvidence("13-slider")
+    }
+
+    @Test
+    fun progressReportsRealValuesAndUnknownStateWithoutClickActions() {
+        openComponent("progress")
+        val progress = compose.onNodeWithTag("gallery_progress")
+        progress.assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+            ProgressBarRangeInfo(0.25f, 0f..1f)))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.SetProgress))
+        compose.onNodeWithTag("gallery_progress_indeterminate").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate))
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "进度未定"))
+        compose.onNodeWithTag("progress_advance").performTouchInput { click() }
+        compose.onNodeWithTag("gallery_progress_value").assertTextEquals("进度：50%")
+        progress.assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+            ProgressBarRangeInfo(0.5f, 0f..1f)))
+        compose.onNodeWithTag("progress_advance").performTouchInput { click() }
+        compose.onNodeWithTag("progress_advance").performTouchInput { click() }.assertIsNotEnabled()
+        compose.onNodeWithTag("gallery_progress_value").assertTextEquals("进度：100%")
+        compose.captureEvidence("14-progress")
+        compose.onNodeWithTag("progress_reset").performTouchInput { click() }
+        compose.onNodeWithTag("gallery_progress_value").assertTextEquals("进度：0%")
+        compose.onNodeWithTag("progress_advance").assertIsEnabled()
+        progress.assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+            ProgressBarRangeInfo(0f, 0f..1f)))
+    }
+
+    @Test
     fun galleryBackNavigationPreservesFormThemeAndComponentState() {
         compose.enterWorkspaceDetails()
         compose.selectDeveloper()
@@ -321,6 +435,75 @@ class WorkspaceFlowTest {
 class WorkspaceStateRestorationTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Test
+    fun tabsKeyboardNavigationSkipsDisabledItemsInRtlAndPreservesPanelState() {
+        val selected = mutableStateOf<String?>("first")
+        lateinit var inputModeManager: InputModeManager
+        compose.setContent {
+            ShadcnTheme {
+                inputModeManager = LocalInputModeManager.current
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    STabs(listOf(TabOption("first", "第一项"), TabOption("disabled", "禁用", false),
+                        TabOption("last", "最后一项")), selected.value, { selected.value = it }, testTag = "rtl_tabs") { id ->
+                        val draft = rememberSaveable { mutableStateOf("") }
+                        SInput(draft.value, { draft.value = it }, "面板草稿", testTag = "draft_$id")
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("draft_first").performTextInput("保留在面板内")
+        closeSoftKeyboard()
+        // Buttons intentionally do not take keyboard focus while Android is in touch mode.
+        compose.runOnIdle { inputModeManager.requestInputMode(InputMode.Keyboard) }
+        compose.onNodeWithTag("rtl_tabs_first").performSemanticsAction(SemanticsActions.RequestFocus) { it() }
+            .assertIsFocused().performKeyInput { pressKey(Key.DirectionLeft) }
+        compose.onNodeWithTag("rtl_tabs_last").assertIsSelected().assertIsFocused()
+        compose.onNodeWithTag("draft_first").assertDoesNotExist()
+        compose.onNodeWithTag("rtl_tabs_last").performKeyInput { pressKey(Key.DirectionRight) }
+        compose.onNodeWithTag("rtl_tabs_first").assertIsSelected().assertIsFocused()
+        compose.onNodeWithTag("draft_first").assertTextEquals("保留在面板内")
+        compose.onNodeWithTag("rtl_tabs_first").performKeyInput { pressKey(Key.MoveEnd) }
+        compose.onNodeWithTag("rtl_tabs_last").assertIsSelected()
+        compose.onNodeWithTag("rtl_tabs_last").performKeyInput { pressKey(Key.MoveHome) }
+        compose.onNodeWithTag("rtl_tabs_first").assertIsSelected()
+    }
+
+    @Test
+    fun sliderAccessibilitySnapsNegativeRangesAndBlocksDisabledCallbacks() {
+        val value = mutableStateOf(-10f)
+        val enabled = mutableStateOf(true)
+        val changes = mutableListOf<Float>()
+        var finishes = 0
+        compose.setContent {
+            ShadcnTheme {
+                SSlider(value.value, { value.value = it; changes += it }, "增益",
+                    valueRange = -10f..0f, steps = 1, enabled = enabled.value,
+                    onValueChangeFinished = { finishes++ }, testTag = "negative_slider")
+            }
+        }
+        compose.onNodeWithTag("negative_slider").performSemanticsAction(SemanticsActions.SetProgress) { it(-3f) }
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+                ProgressBarRangeInfo(-5f, -10f..0f, 1)))
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(-5f), changes)
+            org.junit.Assert.assertEquals(1, finishes)
+        }
+        compose.onNodeWithTag("negative_slider").performSemanticsAction(SemanticsActions.SetProgress) { it(100f) }
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
+                ProgressBarRangeInfo(0f, -10f..0f, 1)))
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(-5f, 0f), changes)
+            org.junit.Assert.assertEquals(2, finishes)
+            enabled.value = false
+        }
+        compose.onNodeWithTag("negative_slider").assertIsNotEnabled()
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(-10f) }
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(listOf(-5f, 0f), changes)
+            org.junit.Assert.assertEquals(2, finishes)
+        }
+    }
 
     @Test
     fun disabledAndLoadingPrimitivesIgnoreAccessibilityActivation() {

@@ -1,0 +1,233 @@
+Picked up JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true -Djdk.net.unixdomain.tmpdir=D:/projects/shadcn-mobile/.gradle/tmp -Djava.io.tmpdir=D:/projects/shadcn-mobile/.gradle/tmp
+Configuration 'wasmJsNpmAggregated' was resolved during configuration time.
+This is a build performance and scalability issue.
+See https://github.com/gradle/gradle/issues/2298
+Run with --info for a stacktrace.
+Configuration 'wasmJsTestNpmAggregated' was resolved during configuration time.
+This is a build performance and scalability issue.
+See https://github.com/gradle/gradle/issues/2298
+Run with --info for a stacktrace.
+> Task :androidApp:preBuild UP-TO-DATE
+> Task :composeApp:androidPreBuild UP-TO-DATE
+> Task :androidApp:preDebugBuild UP-TO-DATE
+> Task :composeApp:preAndroidMainBuild UP-TO-DATE
+> Task :androidApp:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :composeApp:generateAndroidMainEmptyResourceFiles UP-TO-DATE
+> Task :androidApp:generateDebugResources UP-TO-DATE
+> Task :androidApp:packageDebugResources UP-TO-DATE
+> Task :composeApp:kmpPartiallyResolvedDependenciesChecker
+> Task :composeApp:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :composeApp:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForAndroidMain NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForCommonMain NO-SOURCE
+> Task :composeApp:generateActualResourceCollectorsForAndroidMain UP-TO-DATE
+> Task :composeApp:generateComposeResClass UP-TO-DATE
+> Task :composeApp:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :androidApp:processDebugNavigationResources UP-TO-DATE
+> Task :androidApp:parseDebugLocalResources UP-TO-DATE
+> Task :androidApp:generateDebugRFile UP-TO-DATE
+> Task :androidApp:javaPreCompileDebug UP-TO-DATE
+> Task :androidApp:generateDebugAssets UP-TO-DATE
+> Task :androidApp:mergeDebugAssets UP-TO-DATE
+> Task :androidApp:compressDebugAssets UP-TO-DATE
+> Task :androidApp:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :androidApp:checkDebugDuplicateClasses UP-TO-DATE
+> Task :androidApp:desugarDebugFileDependencies UP-TO-DATE
+> Task :androidApp:mergeExtDexDebug UP-TO-DATE
+> Task :androidApp:mapDebugSourceSetPaths UP-TO-DATE
+> Task :androidApp:compileDebugNavigationResources UP-TO-DATE
+> Task :androidApp:mergeDebugResources UP-TO-DATE
+> Task :androidApp:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :androidApp:extractDeepLinksDebug UP-TO-DATE
+> Task :androidApp:mergeDebugJniLibFolders UP-TO-DATE
+> Task :androidApp:validateSigningDebug UP-TO-DATE
+> Task :androidApp:writeDebugAppMetadata UP-TO-DATE
+> Task :androidApp:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :androidApp:preDebugAndroidTestBuild SKIPPED
+> Task :androidApp:generateDebugAndroidTestResources UP-TO-DATE
+> Task :androidApp:packageDebugAndroidTestResources UP-TO-DATE
+> Task :androidApp:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :androidApp:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :androidApp:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :androidApp:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :androidApp:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :androidApp:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :androidApp:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :androidApp:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :androidApp:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :androidApp:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :androidApp:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :androidApp:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :androidApp:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :androidApp:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :androidApp:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :androidApp:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :androidApp:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :kotlinWasmKotlinNpmCachesSetup
+> Task :kotlinWasmNodeJsSetup UP-TO-DATE
+> Task :kotlinWasmRestoreYarnLock UP-TO-DATE
+> Task :kotlinWasmYarnSetup UP-TO-DATE
+> Task :kotlinWasmToolingSetup UP-TO-DATE
+> Task :composeApp:writeAndroidMainAarMetadata UP-TO-DATE
+> Task :androidApp:checkDebugAarMetadata UP-TO-DATE
+> Task :composeApp:processAndroidMainManifest UP-TO-DATE
+> Task :androidApp:processDebugMainManifest UP-TO-DATE
+> Task :androidApp:processDebugManifest UP-TO-DATE
+> Task :androidApp:processDebugManifestForPackage UP-TO-DATE
+> Task :androidApp:processDebugResources UP-TO-DATE
+> Task :composeApp:mergeAndroidMainJniLibFolders UP-TO-DATE
+> Task :composeApp:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :composeApp:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :androidApp:mergeDebugNativeLibs UP-TO-DATE
+> Task :androidApp:stripDebugDebugSymbols UP-TO-DATE
+> Task :androidApp:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :androidApp:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :androidApp:processDebugAndroidTestManifest UP-TO-DATE
+> Task :androidApp:processDebugAndroidTestResources UP-TO-DATE
+> Task :androidApp:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :androidApp:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :composeApp:androidJar UP-TO-DATE
+> Task :composeApp:convertXmlValueResourcesForAndroidHostTest NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForAndroidHostTest NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForAndroidHostTest NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForAndroidHostTest NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForCommonTest NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForCommonTest NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForCommonTest NO-SOURCE
+> Task :composeApp:preAndroidHostTestBuild UP-TO-DATE
+> Task :composeApp:processAndroidHostTestJavaRes NO-SOURCE
+> Task :composeApp:checkIosArm64MainComposeLibrariesCompatibility
+> Task :composeApp:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :composeApp:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForAppleMain NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForIosArm64Main NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForIosArm64Main NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForIosArm64Main NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForIosArm64Main NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForIosMain NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForNativeMain NO-SOURCE
+> Task :composeApp:generateActualResourceCollectorsForIosArm64Main UP-TO-DATE
+> Task :composeApp:compileKotlinIosArm64
+> Task :composeApp:checkIosSimulatorArm64MainComposeLibrariesCompatibility
+> Task :composeApp:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForIosSimulatorArm64Main NO-SOURCE
+> Task :composeApp:generateActualResourceCollectorsForIosSimulatorArm64Main UP-TO-DATE
+> Task :composeApp:compileAndroidMain
+> Task :composeApp:compileKotlinIosSimulatorArm64
+> Task :composeApp:processAndroidMainJavaRes UP-TO-DATE
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:compileDebugKotlin
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes UP-TO-DATE
+> Task :androidApp:mergeDebugJavaResource UP-TO-DATE
+> Task :androidApp:dexBuilderDebug UP-TO-DATE
+> Task :androidApp:mergeProjectDexDebug UP-TO-DATE
+> Task :androidApp:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :androidApp:assembleDebug
+> Task :androidApp:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :composeApp:bundleAndroidMainClassesToRuntimeJar
+> Task :composeApp:compileAndroidHostTest
+
+> Task :androidApp:compileDebugAndroidTestKotlin
+w: file:///D:/projects/shadcn-mobile/androidApp/src/androidTest/kotlin/com/shadcn/mobile/WorkspaceFlowTest.kt:72:19 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///D:/projects/shadcn-mobile/androidApp/src/androidTest/kotlin/com/shadcn/mobile/WorkspaceFlowTest.kt:434:19 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+
+> Task :androidApp:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :androidApp:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :androidApp:dexBuilderDebugAndroidTest
+> Task :androidApp:mergeProjectDexDebugAndroidTest
+
+> Task :composeApp:testAndroidHostTest
+
+Picked up JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true -Djdk.net.unixdomain.tmpdir=D:/projects/shadcn-mobile/.gradle/tmp -Djava.io.tmpdir=D:/projects/shadcn-mobile/.gradle/tmp
+> Task :composeApp:wasmJsPackageJson UP-TO-DATE
+> Task :composeApp:wasmJsTestPackageJson UP-TO-DATE
+> Task :composeApp:wasmJsPublicPackageJson UP-TO-DATE
+> Task :androidApp:packageDebugAndroidTest
+> Task :androidApp:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :composeApp:wasmJsTestPublicPackageJson UP-TO-DATE
+> Task :androidApp:assembleDebugAndroidTest
+> Task :kotlinWasmPackageJsonUmbrella UP-TO-DATE
+> Task :wasmRootPackageJson UP-TO-DATE
+> Task :kotlinWasmNpmInstall UP-TO-DATE
+> Task :kotlinWasmStoreYarnLock UP-TO-DATE
+> Task :composeApp:wasmJsResolveResourcesFromDependencies UP-TO-DATE
+> Task :composeApp:convertXmlValueResourcesForWasmJsMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForWasmJsMain UP-TO-DATE
+> Task :composeApp:prepareComposeResourcesTaskForWasmJsMain UP-TO-DATE
+> Task :composeApp:convertXmlValueResourcesForWebMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForWebMain NO-SOURCE
+> Task :composeApp:prepareComposeResourcesTaskForWebMain NO-SOURCE
+> Task :composeApp:assembleWasmJsMainResources UP-TO-DATE
+> Task :composeApp:wasmJsResolveSelfResourcesCopyHierarchicalMultiplatformResources UP-TO-DATE
+> Task :composeApp:wasmJsAggregateResources UP-TO-DATE
+> Task :composeApp:wasmJsProcessResources UP-TO-DATE
+> Task :composeApp:checkWasmJsMainComposeLibrariesCompatibility
+> Task :composeApp:generateResourceAccessorsForWasmJsMain UP-TO-DATE
+> Task :composeApp:generateResourceAccessorsForWebMain NO-SOURCE
+> Task :composeApp:generateActualResourceCollectorsForWasmJsMain UP-TO-DATE
+> Task :composeApp:kotlinWasmBinaryenSetup UP-TO-DATE
+> Task :composeApp:unpackSkikoWasmRuntime UP-TO-DATE
+> Task :composeApp:processSkikoRuntimeForKWasm UP-TO-DATE
+> Task :composeApp:compileKotlinWasmJs
+> Task :composeApp:wasmJsMainClasses
+> Task :composeApp:compileProductionExecutableKotlinWasmJs
+> Task :composeApp:compileProductionExecutableKotlinWasmJsOptimize
+> Task :composeApp:wasmJsProductionExecutableCompileSync
+
+> Task :composeApp:wasmJsBrowserProductionWebpack
+asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets:
+  shadcn-mobile.js (520 KiB)
+  8101240420c649b16689.wasm (3.49 MiB)
+  658820f72b4617efb380.wasm (8.25 MiB)
+entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+Entrypoints:
+  main (520 KiB)
+      shadcn-mobile.js
+webpack performance recommendations:
+assets by status 8.25 MiB [cached] 1 asset
+asset 8101240420c649b16689.wasm 3.49 MiB [emitted] [immutable] [from: kotlin/shadcn-mobile.wasm] [big] (auxiliary name: main)
+asset shadcn-mobile.js 520 KiB [emitted] [compared for emit] [minimized] [big] (name: main) 2 related assets
+runtime modules 4.83 KiB 7 modules
+orphan modules 886 KiB [orphan] 3 modules
+cacheable modules 926 KiB (javascript) 11.7 MiB (asset)
+  javascript modules 926 KiB
+You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+For more info visit https://webpack.js.org/guides/code-splitting/
+    ./kotlin/shadcn-mobile.mjs 3.11 KiB [built] [code generated]
+    ./kotlin/shadcn-mobile.import-object.mjs + 3 modules 923 KiB [built] [code generated]
+  asset modules 11.7 MiB (asset) 84 bytes (javascript)
+    ./kotlin/shadcn-mobile.wasm 3.49 MiB (asset) 42 bytes (javascript) [built] [code generated]
+    ./kotlin/skiko.wasm 8.25 MiB (asset) 42 bytes (javascript) [built] [code generated]
+webpack 5.108.1 compiled with 3 warnings in 1811 ms
+
+> Task :composeApp:wasmJsBrowserDistribution
+
+[Incubating] Problems report is available at: file:///D:/projects/shadcn-mobile/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 1m 22s
+122 actionable tasks: 26 executed, 96 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.7.0/userguide/configuration_cache_enabling.html

@@ -325,6 +325,151 @@ final class WorkspaceFlowTests: XCTestCase {
     }
 
     @MainActor
+    func testTabsSwitchPanelsPreserveDraftAndIgnoreDisabledTab() {
+        openComponent("tabs")
+        expectSelected("gallery_tabs_profile", true)
+        expectSelected("gallery_tabs_activity", false)
+        expectSelected("gallery_tabs_disabled", false)
+        expectEnabled("gallery_tabs_disabled", false)
+        expectLabel("tabs_count", "已切换 0 次")
+        type("tabs_draft", "A native tab draft")
+        pressKeyboardButton(["Done", "done", "完成"])
+        expectKeyboardHidden()
+
+        tap("gallery_tabs_activity")
+        expectSelected("gallery_tabs_profile", false)
+        expectSelected("gallery_tabs_activity", true)
+        expectAbsent("tabs_draft")
+        expectLabel("tabs_activity", "最近活动：已创建工作空间")
+        expectLabel("tabs_count", "已切换 1 次")
+        tapDisabledControl("gallery_tabs_disabled")
+        expectSelected("gallery_tabs_disabled", false)
+        expectSelected("gallery_tabs_activity", true)
+        expectLabel("tabs_activity", "最近活动：已创建工作空间")
+        expectLabel("tabs_count", "已切换 1 次")
+
+        tap("gallery_tabs_profile")
+        expectSelected("gallery_tabs_profile", true)
+        expectSelected("gallery_tabs_activity", false)
+        expectAbsent("tabs_activity")
+        expectValue("tabs_draft", "A native tab draft")
+        expectLabel("tabs_count", "已切换 2 次")
+        capture("tabs-preserved-draft-and-disabled-tab")
+    }
+
+    @MainActor
+    func testAccordionExpandsOnePanelAndIgnoresDisabledHeader() {
+        openComponent("accordion")
+        expectValue("gallery_accordion_native", "已折叠")
+        expectValue("gallery_accordion_ownership", "已折叠")
+        expectValue("gallery_accordion_disabled", "已折叠")
+        expectAbsent("gallery_accordion_native_content")
+        expectAbsent("gallery_accordion_ownership_content")
+        expectAbsent("gallery_accordion_disabled_content")
+        expectLabel("accordion_count", "已切换 0 次")
+
+        tap("gallery_accordion_native")
+        expectValue("gallery_accordion_native", "已展开")
+        expect(element("gallery_accordion_native_content"), "exists == true")
+        expect(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@",
+            "Android 与 iOS 使用同一套 Compose 组件。")).element, "exists == true")
+        expectLabel("accordion_count", "已切换 1 次")
+
+        tap("gallery_accordion_ownership", scrolling: .up)
+        expectValue("gallery_accordion_native", "已折叠")
+        expectAbsent("gallery_accordion_native_content")
+        expectValue("gallery_accordion_ownership", "已展开")
+        expect(element("gallery_accordion_ownership_content"), "exists == true")
+        expect(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@",
+            "组件状态由调用方持有，示例只保存在本地。")).element, "exists == true")
+        expectLabel("accordion_count", "已切换 2 次")
+        tapDisabledControl("gallery_accordion_disabled")
+        expectValue("gallery_accordion_disabled", "已折叠")
+        expectAbsent("gallery_accordion_disabled_content")
+        expectValue("gallery_accordion_ownership", "已展开")
+        expectLabel("accordion_count", "已切换 2 次")
+        capture("accordion-exclusive-panel-and-disabled-header")
+
+        tap("gallery_accordion_ownership", scrolling: .down)
+        expectValue("gallery_accordion_ownership", "已折叠")
+        expectAbsent("gallery_accordion_ownership_content")
+        expectLabel("accordion_count", "已切换 3 次")
+    }
+
+    @MainActor
+    func testSliderNativeDragUsesStepsAndDisabledDragDoesNothing() {
+        openComponent("slider")
+        expectEnabled("gallery_slider", true)
+        expectEnabled("gallery_slider_disabled", false)
+        expectLabel("gallery_slider_value", "音量：40")
+        expectLabel("gallery_slider_count", "已调整 0 次")
+        expectLabel("gallery_slider_finished", "已完成 0 次调整")
+        reveal("gallery_slider", direction: .up)
+        let slider = element("gallery_slider")
+        guard let initialSliderValue = slider.value as? String else {
+            XCTFail("The slider must expose its adjustable accessibility value")
+            return
+        }
+        // Native coordinates follow the exposed control frame, not app state or a
+        // Compose SetProgress action. The gesture starts at the current thumb.
+        slider.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo:
+                slider.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
+        expect(element("gallery_slider_value"), "label != %@", "音量：40")
+        guard let volume = Int(element("gallery_slider_value").label.replacingOccurrences(of: "音量：", with: "")) else {
+            XCTFail("The slider must expose its numeric volume")
+            return
+        }
+        XCTAssertGreaterThan(volume, 40)
+        XCTAssertLessThanOrEqual(volume, 100)
+        XCTAssertEqual(volume % 10, 0, "Native dragging must snap to ten-unit steps")
+        expect(slider, "value != %@", initialSliderValue)
+        expect(element("gallery_slider_count"), "label != %@", "已调整 0 次")
+        expectLabel("gallery_slider_finished", "已完成 1 次调整")
+        let changedCount = element("gallery_slider_count").label
+        let disabledValue = element("gallery_slider_disabled").value as? String
+        XCTAssertNotNil(disabledValue, "The disabled slider must still expose its value")
+
+        tapDisabledControl("gallery_slider_disabled")
+        let disabled = element("gallery_slider_disabled")
+        disabled.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo:
+                disabled.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        XCTAssertEqual(disabled.value as? String, disabledValue)
+        expectLabel("gallery_slider_value", "音量：\(volume)")
+        expectLabel("gallery_slider_count", changedCount)
+        expectLabel("gallery_slider_finished", "已完成 1 次调整")
+        capture("slider-native-drag-and-disabled-control")
+    }
+
+    @MainActor
+    func testProgressAdvancesToCompletionAndResets() {
+        openComponent("progress")
+        expectValue("gallery_progress", "25%")
+        expectLabel("gallery_progress_value", "进度：25%")
+        expectValue("gallery_progress_indeterminate", "进度未定")
+        expectLabel("gallery_progress_indeterminate", "等待任务开始")
+        for percentage in [50, 75, 100] {
+            tap("progress_advance", scrolling: .up)
+            expectValue("gallery_progress", "\(percentage)%")
+            expectLabel("gallery_progress_value", "进度：\(percentage)%")
+        }
+        expectEnabled("progress_advance", false)
+        expectLabel("progress_advance", "已完成")
+        tapDisabledControl("progress_advance")
+        expectValue("gallery_progress", "100%")
+        expectLabel("gallery_progress_value", "进度：100%")
+        capture("progress-complete-and-disabled-advance")
+
+        tap("progress_reset", scrolling: .up)
+        expectValue("gallery_progress", "0%")
+        expectLabel("gallery_progress_value", "进度：0%")
+        expectEnabled("progress_advance", true)
+        expectValue("gallery_progress_indeterminate", "进度未定")
+        capture("progress-reset-and-indeterminate")
+    }
+
+    @MainActor
     func testComponentNavigationPreservesFormDraftAndTheme() {
         enterDetails(name: "Navigation workspace", email: "hello@example.com")
         selectDeveloper()

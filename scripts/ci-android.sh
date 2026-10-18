@@ -33,7 +33,7 @@ fi
 if [[ "$runner_status" -ne 0 ]]; then
   exit "$runner_status"
 fi
-python3 scripts/ci-check-tests.py instrumentation "$output/instrumentation.txt" 15
-for capture in 01-form 02-combobox 03-sheet 04-review 05-success 06-dark 07-switch 08-textarea 09-radio 10-alert; do
+python3 scripts/ci-check-tests.py instrumentation "$output/instrumentation.txt" 21
+for capture in 01-form 02-combobox 03-sheet 04-review 05-success 06-dark 07-switch 08-textarea 09-radio 10-alert 11-tabs 12-accordion 13-slider 14-progress; do
   test -s "$output/screenshots/$capture.png"
 done

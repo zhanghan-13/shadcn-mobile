@@ -319,10 +319,131 @@ fun SAlert(
     props: [['title', 'String', '提示标题。'], ['description', 'null', '标题下方的补充说明。'], ['modifier', 'Modifier', '控制宽度和外部布局。'], ['variant', 'AlertVariant.Default', 'Default / Destructive。'], ['announce', 'false', '为动态内容启用 live region 语义。']],
     types: [{ name: 'AlertVariant', description: '选择普通提示或危险提示的文字与描边颜色。', signature: `enum class AlertVariant { Default, Destructive }` }],
   },
+  tabs: {
+    title: 'Tabs', zh: '标签页', name: 'STabs', source: 'ui/SelectionComponents.kt',
+    description: '在同一位置切换一组相关内容。选中的标签提供明显的背景反馈，内容通过 Compose 插槽传入。',
+    summary: '内容切换、选中反馈与禁用标签',
+    behavior: ['selectedId 与 onSelect 控制当前标签；null 或不存在的 ID 不显示内容。', '每项提供 Tab 语义，触控高度至少 48dp。可禁用单项或整个组件。', '组件按标签 ID 保留内容内部的 rememberSaveable 状态。示例也可将草稿保存在内容外，切换后继续编辑。'],
+    sample: `@Composable
+fun TabsExample() {
+    var selected by rememberSaveable { mutableStateOf<String?>("profile") }
+    var signature by rememberSaveable { mutableStateOf("") }
+    val tabs = listOf(
+        TabOption("profile", "个人资料"),
+        TabOption("activity", "最近活动"),
+        TabOption("permissions", "成员权限", enabled = false),
+    )
+
+    STabs(tabs, selected, onSelect = { selected = it }) { id ->
+        when (id) {
+            "profile" -> SInput(signature, { signature = it }, "个人签名")
+            "activity" -> Text("最近活动：已创建工作空间")
+        }
+    }
+}`,
+    signature: `@Composable
+fun STabs(
+    options: List<TabOption>,
+    selectedId: String?,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    testTag: String = "",
+    content: @Composable (String) -> Unit,
+)`,
+    props: [['options', 'List<TabOption>', '标签 ID、文字和启用状态。'], ['selectedId / onSelect', 'String? / (String) -> Unit', '选中状态由调用方持有。'], ['modifier', 'Modifier', '控制外部布局。'], ['enabled', 'true', 'false 时禁止切换所有标签。'], ['testTag', '""', '标签节点附加 _${id}，内容节点附加 _content；id 为选项 ID。'], ['content', '(String) -> Unit', '根据当前有效 ID 渲染内容。']],
+    types: [{ name: 'TabOption', description: '同一组内 ID 必须唯一。enabled 只控制这一项是否可交互。', signature: `data class TabOption(val id: String, val label: String, val enabled: Boolean = true)` }],
+  },
+  accordion: {
+    title: 'Accordion', zh: '折叠面板', name: 'SAccordion', source: 'ui/SelectionComponents.kt',
+    description: '将较长的说明放在可展开的标题下。一次展开一项，适合常见问题、设置说明等按需阅读的内容。',
+    summary: '单项展开、收起与禁用标题',
+    behavior: ['expandedId 为 null 时全部收起；展开一项时隐藏上一项的内容。', 'collapsible 为 true 时，再次点击已展开的标题可收起；设为 false 时保留当前展开项。', '标题使用可点击按钮语义，并说明展开状态。禁用项不会响应点击。'],
+    sample: `@Composable
+fun AccordionExample() {
+    var expanded by rememberSaveable { mutableStateOf<String?>(null) }
+    val questions = listOf(
+        AccordionItem("native", "支持哪些平台？"),
+        AccordionItem("ownership", "状态保存在哪里？"),
+    )
+
+    SAccordion(questions, expanded, onExpandedChange = { expanded = it }) { id ->
+        Text(when (id) {
+            "native" -> "Android 与 iOS 使用同一套 Compose 组件。"
+            else -> "状态由调用方持有。"
+        })
+    }
+}`,
+    signature: `@Composable
+fun SAccordion(
+    items: List<AccordionItem>,
+    expandedId: String?,
+    onExpandedChange: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    collapsible: Boolean = true,
+    testTag: String = "",
+    content: @Composable (String) -> Unit,
+)`,
+    props: [['items', 'List<AccordionItem>', '每项的 ID、标题和启用状态。'], ['expandedId / onExpandedChange', 'String? / (String?) -> Unit', 'null 表示全部收起。'], ['modifier', 'Modifier', '控制外部布局。'], ['enabled', 'true', 'false 时禁止切换整个面板。'], ['collapsible', 'true', '是否允许点击当前标题收起内容。'], ['testTag', '""', '标题附加 _${id}，内容附加 _${id}_content；id 为项目 ID。'], ['content', '(String) -> Unit', '渲染已展开项的内容。']],
+    types: [{ name: 'AccordionItem', description: '同一面板内 ID 必须唯一；禁用项可用于说明暂未开放的内容。', signature: `data class AccordionItem(val id: String, val title: String, val enabled: Boolean = true)` }],
+  },
+  slider: {
+    title: 'Slider', zh: '滑块', name: 'SSlider', source: 'ui/SelectionComponents.kt',
+    description: '通过拖动滑块或点击轨道调整数值。支持连续范围、离散步进和禁用状态，适合音量等数值设置。',
+    summary: '数值范围、步进与调整完成回调',
+    behavior: ['value 与 onValueChange 控制当前数值；valueRange 必须是起点小于终点的有限范围，可以包含负数。', 'steps 表示两个端点之间的刻度数。0..100 配合 steps = 9，可按 10 为单位调整。传入值、手势和辅助功能调整都先限制在范围内，再吸附到最近刻度；steps 为 0 时连续调整。', 'onValueChangeFinished 用于调整结束后的处理。禁用时不触发数值或完成回调。辅助功能可通过范围语义调整数值。'],
+    sample: `@Composable
+fun SliderExample() {
+    var volume by rememberSaveable { mutableFloatStateOf(40f) }
+
+    SSlider(
+        value = volume,
+        onValueChange = { volume = it },
+        label = "音量",
+        valueRange = 0f..100f,
+        steps = 9,
+    )
+    Text("音量：" + volume.toInt())
+}`,
+    signature: `@Composable
+fun SSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    steps: Int = 0,
+    enabled: Boolean = true,
+    onValueChangeFinished: (() -> Unit)? = null,
+    testTag: String = "",
+)`,
+    props: [['value / onValueChange', 'Float / (Float) -> Unit', '有限数值；显示值与回调值统一限制范围并按 steps 吸附。'], ['label', 'String', '可见标签与可访问名称。'], ['modifier', 'Modifier', '控制外部布局。'], ['valueRange', '0f..1f', '有限范围，起点必须小于终点，可包含负数。'], ['steps', '0', '非负整数；0 为连续调整。'], ['enabled', 'true', 'false 时禁止触摸与辅助功能调整。'], ['onValueChangeFinished', 'null', '一次调整结束时调用。'], ['testTag', '""', '用于定位滑块的语义节点。']],
+  },
+  progress: {
+    title: 'Progress', zh: '进度条', name: 'SProgress', source: 'ui/SelectionComponents.kt',
+    description: '展示任务进度。已知进度显示百分比；暂时无法计算时传入 null，显示未知进度状态。',
+    summary: '百分比进度与未知进度状态',
+    behavior: ['value 取 0..1；有限值超出范围时按 0 或 1 显示。null 表示进度未知。', '标签、数值和进度条组成一个辅助功能节点；进度条只展示状态，不响应点击。', '未知进度使用静态样式。组件不启动动画、计时器或后台任务，进度由调用方更新。'],
+    note: '示例按钮每次将进度增加 25%，达到 100% 后禁用。重置只影响本地演示数值。',
+    sample: `@Composable
+fun ProgressExample() {
+    SProgress(value = 0.25f, label = "文件准备进度")
+    SProgress(value = null, label = "等待任务开始")
+}`,
+    signature: `@Composable
+fun SProgress(
+    value: Float?,
+    label: String,
+    modifier: Modifier = Modifier,
+    testTag: String = "",
+)`,
+    props: [['value', 'Float?', '0..1 的有限数值；null 表示未知进度。'], ['label', 'String', '进度的可见标签与可访问名称。'], ['modifier', 'Modifier', '控制外部布局。'], ['testTag', '""', '用于定位合并后的进度语义节点。']],
+  },
 };
 
 export const pages = [
-  { route: 'overview', title: '介绍与体验', category: '开始使用', description: '体验完整表单与十个组件示例', keywords: '介绍 入门 完整表单 在线体验 demo form overview' },
+  { route: 'overview', title: '介绍与体验', category: '开始使用', description: '体验完整表单与十四个组件示例', keywords: '介绍 入门 完整表单 在线体验 demo form overview' },
   { route: 'installation', title: '快速开始', category: '开始使用', description: '在 Android 与 iOS 运行项目', keywords: '安装 运行 Android iOS Gradle Xcode Kotlin 下载 clone installation' },
   { route: 'theming', title: '主题与令牌', category: '开始使用', description: 'Zinc 配色、深浅主题与自定义', keywords: '主题 深色 浅色 配色 color theme token zinc' },
   ...Object.entries(components).map(([key, entry]) => ({ route: `components/${key}`, title: entry.title, zh: entry.zh, category: '组件', description: entry.summary, keywords: `${key} ${entry.zh} ${entry.name} ${entry.description} ${(entry.types || []).map((type) => type.name).join(' ')}` })),

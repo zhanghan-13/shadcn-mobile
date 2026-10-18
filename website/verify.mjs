@@ -19,8 +19,8 @@ for (const file of ['app.js', 'content.js']) {
 }
 for (const script of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) new Script(script[1]);
 
-assert.deepEqual(Object.keys(components), ['button', 'input', 'checkbox', 'combobox', 'dialog', 'sheet', 'switch', 'textarea', 'radio-group', 'alert']);
-assert.equal(pages.length, 13);
+assert.deepEqual(Object.keys(components), ['button', 'input', 'checkbox', 'combobox', 'dialog', 'sheet', 'switch', 'textarea', 'radio-group', 'alert', 'tabs', 'accordion', 'slider', 'progress']);
+assert.equal(pages.length, 17);
 assert.equal(new Set(pages.map((page) => page.route)).size, pages.length);
 assert.equal(searchPages('按钮')[0].route, 'components/button');
 assert.equal(searchPages('SInput')[0].route, 'components/input');
@@ -29,6 +29,10 @@ for (const [query, component] of [
   ['多行 输入', 'textarea'], ['STextarea', 'textarea'],
   ['单选组', 'radio-group'], ['radio group', 'radio-group'], ['RadioOption', 'radio-group'],
   ['警告', 'alert'], ['SAlert', 'alert'], ['AlertVariant', 'alert'],
+  ['标签页', 'tabs'], ['STabs', 'tabs'], ['TabOption', 'tabs'],
+  ['折叠面板', 'accordion'], ['SAccordion', 'accordion'], ['AccordionItem', 'accordion'],
+  ['滑块', 'slider'], ['SSlider', 'slider'],
+  ['进度条', 'progress'], ['SProgress', 'progress'],
 ]) assert.equal(searchPages(query)[0]?.route, `components/${component}`, `${query}: component is searchable`);
 assert.equal(searchPages('iOS')[0].route, 'installation');
 assert.equal(searchPages('THEME')[0].route, 'theming');
@@ -47,7 +51,7 @@ for (const [key, component] of Object.entries(components)) {
   assert.ok(component.sample.includes(`${component.name}(`), `${key}: example calls actual component`);
   for (const type of component.types || []) {
     const pattern = type.signature.startsWith('data class ')
-      ? new RegExp(`data class ${type.name}\\([\\s\\S]*?\\n\\)`)
+      ? new RegExp(`data class ${type.name}\\([^)]*\\)`)
       : new RegExp(`enum class ${type.name}\\s*\\{[^}]*\\}`);
     const actual = source.match(pattern)?.[0];
     assert.ok(actual, `${type.name}: public type exists`);
@@ -86,4 +90,5 @@ if (process.argv.includes('--dist')) {
     await stat(path.resolve(demo, match[1].split('?')[0]));
   }
 }
-console.log(`Verified ${path.relative(root, directory)}: ${pages.length} routes, ${Object.keys(components).length} exact Kotlin APIs, 2 related types, shared preview keys, bilingual search, theme tokens, relative assets${process.argv.includes('--dist') ? ', packaged Wasm runtime' : ''}.`);
+const relatedTypeCount = Object.values(components).reduce((count, component) => count + (component.types?.length || 0), 0);
+console.log(`Verified ${path.relative(root, directory)}: ${pages.length} routes, ${Object.keys(components).length} exact Kotlin APIs, ${relatedTypeCount} related types, shared preview keys, bilingual search, theme tokens, relative assets${process.argv.includes('--dist') ? ', packaged Wasm runtime' : ''}.`);

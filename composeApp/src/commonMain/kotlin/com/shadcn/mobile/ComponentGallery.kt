@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -11,8 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.shadcn.mobile.form.Roles
 import com.shadcn.mobile.form.FormValues
@@ -21,7 +25,7 @@ import com.shadcn.mobile.ui.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-internal val componentNames = setOf("button", "input", "checkbox", "combobox", "dialog", "sheet", "switch", "textarea", "radio-group", "alert")
+internal val componentNames = setOf("button", "input", "checkbox", "combobox", "dialog", "sheet", "switch", "textarea", "radio-group", "alert", "tabs", "accordion", "slider", "progress")
 
 internal fun componentTitle(name: String): String =
     if (name == "radio-group") "RadioGroup" else name.replaceFirstChar { it.uppercase() }
@@ -51,6 +55,10 @@ internal fun ComponentGallery(component: String, darkTheme: Boolean?, centerCont
                     "textarea" -> TextareaExample()
                     "radio-group" -> RadioGroupExample()
                     "alert" -> AlertExample()
+                    "tabs" -> TabsExample()
+                    "accordion" -> AccordionExample()
+                    "slider" -> SliderExample()
+                    "progress" -> ProgressExample()
                 }
             }
         }
@@ -192,6 +200,81 @@ private fun AlertExample() {
     )
     SButton(if (connected) "连接已恢复" else "重试保存", { connected = true },
         Modifier.fillMaxWidth().testTag("alert_trigger"), variant = ButtonVariant.Outline, enabled = !connected)
+}
+
+@Composable
+private fun TabsExample() {
+    val focusManager = LocalFocusManager.current
+    var selected by rememberSaveable { mutableStateOf<String?>("profile") }
+    var draft by rememberSaveable { mutableStateOf("") }
+    var changes by rememberSaveable { mutableIntStateOf(0) }
+    val options = remember {
+        listOf(
+            TabOption("profile", "个人资料"),
+            TabOption("activity", "最近活动"),
+            TabOption("disabled", "成员权限", enabled = false),
+        )
+    }
+    STabs(options, selected, { selected = it; changes++ }, testTag = "gallery_tabs") { tab ->
+        when (tab) {
+            "profile" -> SInput(draft, { draft = it }, "个人签名", placeholder = "写一句介绍自己的话…",
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                testTag = "tabs_draft")
+            "activity" -> ExampleNote("最近活动：已创建工作空间", Modifier.testTag("tabs_activity"))
+        }
+    }
+    ExampleNote("切换标签后，刚才输入的签名仍会保留。成员权限暂不可用。")
+    ExampleNote("已切换 $changes 次", Modifier.testTag("tabs_count"))
+}
+
+@Composable
+private fun AccordionExample() {
+    var expanded by rememberSaveable { mutableStateOf<String?>(null) }
+    var changes by rememberSaveable { mutableIntStateOf(0) }
+    val items = remember {
+        listOf(
+            AccordionItem("native", "支持哪些平台？"),
+            AccordionItem("ownership", "状态保存在哪里？"),
+            AccordionItem("disabled", "团队部署指南", enabled = false),
+        )
+    }
+    SAccordion(items, expanded, { expanded = it; changes++ }, testTag = "gallery_accordion") { item ->
+        ExampleNote(when (item) {
+            "native" -> "Android 与 iOS 使用同一套 Compose 组件。"
+            "ownership" -> "组件状态由调用方持有，示例只保存在本地。"
+            else -> ""
+        })
+    }
+    ExampleNote("一次展开一项，再次点击标题可以收起。团队部署指南暂不可用。")
+    ExampleNote("已切换 $changes 次", Modifier.testTag("accordion_count"))
+}
+
+@Composable
+private fun SliderExample() {
+    var volume by rememberSaveable { mutableFloatStateOf(40f) }
+    var changes by rememberSaveable { mutableIntStateOf(0) }
+    var finished by rememberSaveable { mutableIntStateOf(0) }
+    SSlider(volume, { volume = it; changes++ }, "音量", valueRange = 0f..100f, steps = 9,
+        onValueChangeFinished = { finished++ }, testTag = "gallery_slider")
+    ExampleNote("音量：${volume.toInt()}", Modifier.testTag("gallery_slider_value"))
+    SSlider(60f, { changes++ }, "系统音量", valueRange = 0f..100f, steps = 9,
+        enabled = false, onValueChangeFinished = { finished++ }, testTag = "gallery_slider_disabled")
+    ExampleNote("拖动滑块或点击轨道，以 10 为单位调整音量。系统音量由管理员设置。")
+    ExampleNote("已调整 $changes 次", Modifier.testTag("gallery_slider_count"))
+    ExampleNote("已完成 $finished 次调整", Modifier.testTag("gallery_slider_finished"))
+}
+
+@Composable
+private fun ProgressExample() {
+    var progress by rememberSaveable { mutableFloatStateOf(0.25f) }
+    SProgress(progress, "文件准备进度", testTag = "gallery_progress")
+    ExampleNote("进度：${(progress * 100).toInt()}%", Modifier.testTag("gallery_progress_value"))
+    SButton(if (progress >= 1f) "已完成" else "推进 25%", { progress = (progress + 0.25f).coerceAtMost(1f) },
+        Modifier.fillMaxWidth().testTag("progress_advance"), enabled = progress < 1f)
+    SButton("重置进度", { progress = 0f }, Modifier.fillMaxWidth().testTag("progress_reset"), variant = ButtonVariant.Outline)
+    SProgress(null, "等待任务开始", testTag = "gallery_progress_indeterminate")
+    ExampleNote("上方按钮只调整本地示例。下方展示未知进度，不会触发后台任务。")
 }
 
 @Composable

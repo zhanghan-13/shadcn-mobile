@@ -1,6 +1,6 @@
 # shadcn-mobile
 
-A native Compose Multiplatform prototype of ten shadcn-inspired components for **Android and iOS**, with a documentation playground that runs the same Kotlin UI in the browser. The shared form connects Button, Input, Checkbox, a searchable Combobox, Dialog and Sheet. The component gallery also includes Switch, Textarea, RadioGroup and Alert.
+A native Compose Multiplatform prototype of fourteen shadcn-inspired components for **Android and iOS**, with a documentation playground that runs the same Kotlin UI in the browser. The shared form connects Button, Input, Checkbox, a searchable Combobox, Dialog and Sheet. The component gallery also includes Switch, Textarea, RadioGroup, Alert, Tabs, Accordion, Slider and Progress.
 
 Repository: [zhanghan-13/shadcn-mobile](https://github.com/zhanghan-13/shadcn-mobile). The project includes Android/iOS hosts, shared components and an interactive documentation site.
 
@@ -11,6 +11,7 @@ Create a local demonstration workspace: enter its name and an email, search for 
 - Semantic zinc tokens with light/dark themes and a theme toggle.
 - Foundation-based buttons, text fields and checkbox rows; native Compose window containers for menus, dialogs and sheets.
 - Switch settings, multiline Textarea, mutually exclusive RadioGroup options and inline Alert messages, with shared interactive examples.
+- Tabs with a preserved input draft, single-item Accordion, stepped Slider and determinate/indeterminate Progress examples.
 - Minimum 48dp interactive targets, scalable text, focus/pressed/error/disabled/loading states.
 - Native IME Next/Done, scrollable form, safe-area and keyboard insets.
 - Search with no-results recovery; staged sheet edits that cancel on dismissal.
@@ -73,11 +74,13 @@ The suite covers validation, Chinese input through native Paste, role search, sa
 
 ## Tests and evidence
 
+Tabs, Accordion, Slider and Progress are the current batch under validation. Local Android verification passed all 21 interaction tests and 10 shared tests; the four new component tests also passed in dark mode at 150% font scale and approximately 375dp width. The expanded 17-test iOS suite has not run yet. See the [current batch verification record](docs/next-components-verification.md) for logs, fixes and screenshots. The dated results above cover the preceding ten-component version.
+
 See [native verification](docs/verification.md), [browser verification](docs/web-verification.md) and [CI configuration checks](docs/ci-validation.md) for the tested environments, results and remaining checks. Android instrumentation screenshots are written to the app's external-files `screenshots` directory, and selected captures are copied to `docs/screenshots/`.
 
 ## Interactive documentation
 
-The documentation uses static HTML/CSS/JavaScript around a real Compose/Wasm preview. Its 13 routes include the complete workspace form, ten component examples, Kotlin usage snippets, searchable navigation, light/dark themes and quick-start guides. Browser previews share native component code; they do not emulate Android or iOS system UI.
+The documentation uses static HTML/CSS/JavaScript around a real Compose/Wasm preview. Its 17 routes include the complete workspace form, fourteen component examples, Kotlin usage snippets, searchable navigation, light/dark themes and quick-start guides. Browser previews share native component code; they do not emulate Android or iOS system UI.
 
 With Node.js 24 and the Java/Android SDK setup above:
 
@@ -95,8 +98,8 @@ The preview requires a browser with WebAssembly GC support. Native keyboard, ges
 
 Three workflows are prepared:
 
-- **Android:** build app/test APKs, verify 10 shared tests and 15 API 35 emulator tests actually ran, and upload APKs/reports/screenshots.
-- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute 13 native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence.
+- **Android:** build app/test APKs, verify the expected shared tests and API 35 emulator tests actually ran, and upload APKs/reports/screenshots.
+- **iOS:** build device and simulator frameworks on macOS, compile the Swift host, execute native UI tests serially in an iPhone simulator, and collect reports, screenshots and failure evidence.
 - **Docs and Pages:** build the shared Wasm preview and static documentation; pull requests build only, while `main` can deploy the validated artifact to Pages.
 
 Actions use pinned revisions and deployment permissions are restricted to the Pages deployment job. This repository uses **Settings → Pages → Source → GitHub Actions**. The workflow publishes the documentation to [zhanghan-13.github.io/shadcn-mobile](https://zhanghan-13.github.io/shadcn-mobile/). Check [GitHub Actions](https://github.com/zhanghan-13/shadcn-mobile/actions) for the latest build and deployment results, and [delivery status](docs/delivery.md) for the verification scope.
